@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alarmes — Central de Operação</title>
+<link rel="icon" type="image/png" href="/icone.png">
+<style>
+  :root {
+    --painel: #c5c9c3; --tela: #e8eae5; --grafite: #23282a; --tinta: #1a1f1c; --apagado: #5b625c;
+    --linha: #b3b8b1; --critico: #c1121f; --atencao: #b37700; --info: #1f5c99; --ok: #1c7a4f;
+    --titulo: "Archivo", "Segoe UI", system-ui, sans-serif;
+    --corpo: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--painel); color: var(--tinta); font: 15px/1.4 var(--corpo); }
+  header { background: var(--grafite); color: #f2f3f0; padding: 10px 20px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  header h1 { margin: 0; font: 700 18px var(--titulo); letter-spacing: .06em; text-transform: uppercase; }
+  nav { display: flex; gap: 4px; }
+  nav a { color: #c9cec7; text-decoration: none; padding: 6px 12px; font-weight: 600; border-bottom: 3px solid transparent; }
+  nav a[aria-current="page"] { color: #fff; border-bottom-color: #d99000; }
+  header .dir { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+  .hora { color: #b9bfb7; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .conta { color: #b9bfb7; font-size: 13px; overflow-wrap: anywhere; }
+  .conta a { color: #f2f3f0; margin-left: 8px; }
+  button { font: 600 13px var(--corpo); padding: 7px 12px; border: 1px solid #4d5456; background: #3a4143; color: #eef0ec; cursor: pointer; }
+  button:hover { background: #47504f; }
+  button.claro { background: #f4f5f2; color: var(--grafite); border-color: var(--grafite); }
+  button.claro:hover { background: var(--grafite); color: #fff; }
+  main { padding: 16px 20px 32px; max-width: 1400px; margin: 0 auto; }
+  .som-off { background: #fff4d6; border: 1px solid var(--atencao); padding: 10px 14px; margin-bottom: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .aviso { background: #fbeaea; border: 1px solid var(--critico); color: var(--critico); padding: 8px 12px; margin-bottom: 12px; }
+  .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--tela); border: 1px solid var(--linha); padding: 10px 14px; }
+  .kpi .rot { font: 600 11px var(--corpo); letter-spacing: .08em; text-transform: uppercase; color: var(--apagado); }
+  .kpi .val { font: 700 28px var(--titulo); font-variant-numeric: tabular-nums; }
+  .barra { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+  .barra h2 { margin: 0; font: 700 15px var(--titulo); letter-spacing: .06em; text-transform: uppercase; }
+  .barra .acao { margin-left: auto; }
+  .lista { display: grid; gap: 8px; }
+  .alarme { background: var(--tela); border: 1px solid var(--linha); border-left: 6px solid var(--linha);
+            display: grid; grid-template-columns: 130px 190px 1fr 150px auto; gap: 12px; align-items: center; padding: 10px 12px; }
+  .alarme.alta { border-left-color: var(--critico); }
+  .alarme.media { border-left-color: var(--atencao); }
+  .alarme.baixa, .alarme.info { border-left-color: var(--info); }
+  .alarme.novo { background: #fff; box-shadow: 0 0 0 2px var(--critico) inset; animation: piscar 1.2s ease-in-out infinite alternate; }
+  .alarme.novo.media { box-shadow: 0 0 0 2px var(--atencao) inset; }
+  @keyframes piscar { from { background: #fff; } to { background: #fdecec; } }
+  @media (prefers-reduced-motion: reduce) { .alarme.novo { animation: none; } }
+  .prio { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+  .prio i { font-style: normal; width: 20px; height: 20px; display: inline-grid; place-items: center; border-radius: 50%; color: #fff; font-size: 12px; }
+  .alta .prio i { background: var(--critico); } .media .prio i { background: var(--atencao); }
+  .baixa .prio i, .info .prio i { background: var(--info); }
+  .loja { font: 700 15px var(--titulo); }
+  .origem { font-size: 12px; color: var(--apagado); }
+  .msg { overflow-wrap: anywhere; }
+  .msg small { display: block; color: var(--apagado); font-size: 12px; }
+  .quando { font-size: 13px; font-variant-numeric: tabular-nums; }
+  .quando small { display: block; color: var(--apagado); }
+  .acoes { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+  a.botao { display: inline-block; padding: 7px 12px; border: 1px solid var(--grafite); color: var(--grafite); text-decoration: none;
+            font-weight: 600; font-size: 13px; background: #f4f5f2; white-space: nowrap; }
+  a.botao:hover { background: var(--grafite); color: #fff; }
+  .vazio { background: var(--tela); border: 1px dashed var(--linha); padding: 28px; text-align: center; color: var(--ok); font-weight: 600; }
+  @media (max-width: 900px) {
+    .alarme { grid-template-columns: 1fr; gap: 6px; }
+    .acoes { justify-content: flex-start; }
+    main, header { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Central de Operação</h1>
+  <nav aria-label="Telas da central">
+    <a href="/">Lojas</a>
+    <a href="/alarmes" aria-current="page">Alarmes</a>
+    <a href="/acessos" id="nav-acessos" hidden>Acessos</a>
+  </nav>
+  <div class="dir">
+    <span class="hora" id="hora">—</span>
+    <button id="btn-som" type="button">Som: desligado</button>
+    <span class="conta" id="conta" hidden></span>
+  </div>
+</header>
+<main>
+  <div class="som-off" id="som-off">
+    <b>O som dos alarmes está desligado.</b>
+    <span>O navegador só permite tocar depois de um clique nesta página.</span>
+    <button class="claro" id="btn-ativar" type="button">Ativar som</button>
+  </div>
+  <div class="aviso" id="aviso" hidden>Sem resposta do servidor da central. A lista abaixo pode estar desatualizada.</div>
+  <section class="resumo" aria-label="Resumo">
+    <div class="kpi"><div class="rot">Alarmes ativos</div><div class="val" id="k-ativos">—</div></div>
+    <div class="kpi"><div class="rot">Prioridade alta</div><div class="val" id="k-alta">—</div></div>
+    <div class="kpi"><div class="rot">Não vistos na central</div><div class="val" id="k-novos">—</div></div>
+    <div class="kpi"><div class="rot">Lojas sem contato</div><div class="val" id="k-sem">—</div></div>
+  </section>
+  <div class="barra">
+    <h2>Alarmes ativos de todas as lojas</h2>
+    <button class="claro acao" id="btn-ciente-todos" type="button" hidden>Ciente de todos</button>
+  </div>
+  <section class="lista" id="lista" aria-live="polite"></section>
+</main>
+<script>
+  const PESO = { alta: 0, media: 1, baixa: 2, info: 3 };
+  const ROTULO = { alta: ['!', 'Alta'], media: ['!', 'Média'], baixa: ['i', 'Baixa'], info: ['i', 'Info'] };
+  const el = (tag, props = {}, ...filhos) => {
+    const n = document.createElement(tag);
+    Object.assign(n, props);
+    for (const f of filhos) if (f != null) n.append(f);
+    return n;
+  };
+  const guardar = (k, v) => { try { localStorage.setItem(k, v); } catch { /* sem armazenamento: segue sem lembrar */ } };
+  const ler = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+
+  // "visto na central": o operador daqui já tomou ciência (não é o reconhecimento da loja)
+  let vistos = new Set(JSON.parse(ler('central-alarmes-vistos') || '[]'));
+  let somLigado = false;
+  let audio = null;
+  let atuais = [];
+
+  function tocar() {
+    if (!somLigado || !audio) return;
+    const t = audio.currentTime;
+    for (const [ini, f] of [[0, 880], [0.28, 660]]) {
+      const o = audio.createOscillator();
+      const g = audio.createGain();
+      o.frequency.value = f;
+      o.type = 'square';
+      g.gain.setValueAtTime(0.0001, t + ini);
+      g.gain.exponentialRampToValueAtTime(0.18, t + ini + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + ini + 0.24);
+      o.connect(g).connect(audio.destination);
+      o.start(t + ini);
+      o.stop(t + ini + 0.26);
+    }
+  }
+  function ativarSom() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      audio.resume();
+      somLigado = true;
+    } catch { somLigado = false; }
+    document.getElementById('som-off').hidden = somLigado;
+    document.getElementById('btn-som').textContent = somLigado ? 'Som: ligado' : 'Som: desligado';
+  }
+  document.getElementById('btn-ativar').addEventListener('click', ativarSom);
+  document.getElementById('btn-som').addEventListener('click', () => {
+    if (somLigado) {
+      somLigado = false;
+      document.getElementById('btn-som').textContent = 'Som: desligado';
+      document.getElementById('som-off').hidden = false;
+    } else ativarSom();
+  });
+
+  const chave = (a) => `${a.loja}|${a.mensagem}|${a.inicio || 0}`;
+  const ha = (ts, agora) => {
+    if (!ts) return '';
+    const s = Math.max(0, Math.round((agora - ts) / 1000));
+    if (s < 60) return `há ${s} s`;
+    if (s < 3600) return `há ${Math.round(s / 60)} min`;
+    if (s < 86400) return `há ${Math.floor(s / 3600)} h ${Math.round((s % 3600) / 60)} min`;
+    return `há ${Math.round(s / 86400)} dia(s)`;
+  };
+
+  /** "há 3 min", marcado para ser atualizado no lugar a cada consulta */
+  function tempo(inicio, agora) {
+    const s = el('small', { textContent: ha(inicio, agora) });
+    s.dataset.inicio = String(inicio || 0);
+    return s;
+  }
+
+  /** Os alarmes da loja + o que a própria central detecta (loja muda, coleta parada). */
+  function juntar(lojas) {
+    const lista = [];
+    for (const l of lojas) {
+      if (l.status === 'sem_contato') {
+        lista.push({ loja: l.id, nomeLoja: l.nome, painel: l.painel, prioridade: 'alta', inicio: l.sem_contato_desde || l.contato || 0,
+          mensagem: 'Loja sem comunicação com a central', detalhe: l.erro || '', origem: 'central' });
+        continue;   // sem contato, os alarmes dela são os da última leitura: não dá para afirmar que seguem ativos
+      }
+      if (l.status === 'dados_parados') {
+        lista.push({ loja: l.id, nomeLoja: l.nome, painel: l.painel, prioridade: 'alta', inicio: l.dados?.ts || 0,
+          mensagem: 'Coleta parada na loja (supervisório no ar, sem ler os equipamentos)', detalhe: '', origem: 'central' });
+      }      for (const a of l.dados?.alarmes || []) {
+        lista.push({ loja: l.id, nomeLoja: l.nome, painel: l.painel, prioridade: a.prioridade || 'media',
+          inicio: a.inicio, mensagem: a.mensagem, reconhecido: a.reconhecido, origem: 'loja' });
+      }
+    }
+    return lista;
+  }
+
+  function desenhar({ agora, lojas }) {
+    document.getElementById('hora').textContent = new Date(agora).toLocaleString('pt-BR');
+    atuais = juntar(lojas);
+    // esquece o "visto" de alarme que já foi embora: se voltar, é novo de novo
+    const ativas = new Set(atuais.map(chave));
+    vistos = new Set([...vistos].filter((k) => ativas.has(k)));
+    guardar('central-alarmes-vistos', JSON.stringify([...vistos]));
+
+    const novos = atuais.filter((a) => !vistos.has(chave(a)));
+    document.getElementById('k-ativos').textContent = atuais.length;
+    document.getElementById('k-alta').textContent = atuais.filter((a) => a.prioridade === 'alta').length;
+    document.getElementById('k-novos').textContent = novos.length;
+    document.getElementById('k-sem').textContent = lojas.filter((l) => l.status === 'sem_contato').length;
+    document.title = `${novos.length ? `(${novos.length}) ` : ''}Alarmes — Central de Operação`;
+    document.getElementById('btn-ciente-todos').hidden = !novos.length;
+
+    const alvo = document.getElementById('lista');
+    // só redesenha se a lista mudou: redesenhar a cada 5 s perderia o clique de
+    // quem estivesse apertando um botão naquele instante
+    const assinatura = JSON.stringify([lojas.length, atuais.map((a) => [chave(a), vistos.has(chave(a)), a.reconhecido, a.detalhe])]);
+    if (assinatura === alvo.dataset.assinatura) {
+      alvo.querySelectorAll('[data-inicio]').forEach((s) => { s.textContent = ha(Number(s.dataset.inicio), agora); });
+      return;
+    }
+    alvo.dataset.assinatura = assinatura;
+    alvo.replaceChildren();
+    if (!atuais.length) {
+      alvo.append(el('div', { className: 'vazio', textContent: `✓ Nenhum alarme ativo nas ${lojas.length} loja(s).` }));
+      return;
+    }
+    const ordem = [...atuais].sort((a, b) => Number(vistos.has(chave(a))) - Number(vistos.has(chave(b)))
+      || PESO[a.prioridade] - PESO[b.prioridade] || (b.inicio || 0) - (a.inicio || 0));
+    for (const a of ordem) {
+      const novo = !vistos.has(chave(a));
+      const [icone, rot] = ROTULO[a.prioridade] || ROTULO.media;
+      const acoes = el('div', { className: 'acoes' });
+      if (novo) {
+        const b = el('button', { className: 'claro', type: 'button', textContent: 'Ciente' });
+        b.addEventListener('click', () => { vistos.add(chave(a)); guardar('central-alarmes-vistos', JSON.stringify([...vistos])); desenhar(ultimo); });
+        acoes.append(b);
+      }
+      acoes.append(el('a', { className: 'botao', href: `${a.painel}#alarmes`, target: '_blank', rel: 'noopener', textContent: 'Abrir configurador' }));
+      alvo.append(el('article', { className: `alarme ${a.prioridade}${novo ? ' novo' : ''}` },
+        el('div', { className: 'prio' }, el('i', { textContent: icone, ariaHidden: 'true' }), rot),
+        el('div', {}, el('div', { className: 'loja', textContent: a.nomeLoja }),
+          el('div', { className: 'origem', textContent: a.origem === 'central' ? 'detectado pela central' : (a.reconhecido ? 'reconhecido na loja' : 'não reconhecido na loja') })),
+        el('div', { className: 'msg', textContent: a.mensagem }, a.detalhe ? el('small', { textContent: a.detalhe }) : null),
+        el('div', { className: 'quando' }, a.inicio ? new Date(a.inicio).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—',
+          tempo(a.inicio, agora)),
+        acoes));
+    }
+  }
+
+  document.getElementById('btn-ciente-todos').addEventListener('click', () => {
+    for (const a of atuais) vistos.add(chave(a));
+    guardar('central-alarmes-vistos', JSON.stringify([...vistos]));
+    desenhar(ultimo);
+  });
+
+  let ultimo = { agora: Date.now(), lojas: [] };
+  async function atualizar() {
+    try {
+      const r = await fetch('/api/lojas', { cache: 'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      ultimo = await r.json();
+      desenhar(ultimo);
+      document.getElementById('aviso').hidden = true;
+    } catch {
+      document.getElementById('aviso').hidden = false;
+    }
+  }
+  // enquanto houver alarme ALTO não visto, toca a cada 10 s até alguém dar "Ciente"
+  setInterval(() => {
+    if (atuais.some((a) => a.prioridade === 'alta' && !vistos.has(chave(a)))) tocar();
+  }, 10000);
+  let antes = new Set();
+  setInterval(async () => {
+    await atualizar();
+    // alarme que acabou de aparecer toca na hora, sem esperar o ciclo de 10 s
+    const agoraChaves = new Set(atuais.map(chave));
+    if ([...agoraChaves].some((k) => !antes.has(k) && !vistos.has(k))) tocar();
+    antes = agoraChaves;
+  }, 5000);
+  atualizar().then(() => { antes = new Set(atuais.map(chave)); });
+</script>
+<script>
+  // quem entrou pela internet: e-mail, sair e (administrador) a tela de acessos
+  fetch('/api/eu', { cache: 'no-store' }).then((r) => r.json()).then((eu) => {
+    document.getElementById('nav-acessos').hidden = !eu.admin;
+    if (!eu.email) return;
+    const conta = document.getElementById('conta');
+    const sair = Object.assign(document.createElement('a'), { href: '/oauth2/sign_out?rd=%2F', textContent: 'Sair' });
+    conta.replaceChildren(eu.email, sair);
+    conta.hidden = false;
+  }).catch(() => {});
+</script>
+</body>
+</html>

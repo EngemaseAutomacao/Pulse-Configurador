@@ -1,0 +1,333 @@
+{
+  "titulo": "CLP Mitsubishi FX3U — disjuntor e caixa d'água",
+  "fabricante": "Mitsubishi",
+  "modelo": "FX3U",
+  "protocolo": "Modbus RTU",
+  "observacao": "Convertido do flow Node-RED. X = entradas discretas (FC2, base 0), Y = saídas (FC1, base 0), nível analógico em D212 (FC3). Atenção: X e Y são OCTAIS no CLP — X10 é o endereço 8 em Modbus.",
+  "equipamento": {
+    "grupo": "agua"
+  },
+  "conexao": {
+    "tipo": "rtu",
+    "porta_serial": "COM7",
+    "baud": 9600,
+    "paridade": "none",
+    "bits_dados": 8,
+    "bits_parada": 1,
+    "timeout_ms": 1000
+  },
+  "padrao": {
+    "funcao": "holding",
+    "tipo": "int16",
+    "gap_maximo": 4,
+    "max_registradores": 64
+  },
+  "tags": [
+    {
+      "nome": "nivel",
+      "rotulo": "Nível da caixa d'água",
+      "unidade": "%",
+      "endereco": 212,
+      "tipo": "uint16",
+      "escala": 0.029949087,
+      "offset": -22.641509,
+      "limitar": [
+        0,
+        100
+      ],
+      "decimais": 1,
+      "_escala": "4 mA = 756 → 0 % · 20 mA = 4095 → 100 %. Se trocar o sensor, recalcule: escala = 100/(RAW_MAX-RAW_MIN), offset = -RAW_MIN*escala."
+    },
+    {
+      "nome": "nivel_bruto",
+      "rotulo": "Leitura bruta do sensor",
+      "unidade": "",
+      "endereco": 212,
+      "tipo": "uint16",
+      "decimais": 0,
+      "lento": false,
+      "_uso": "Mesmo registrador sem escala. É o que detecta fio rompido: abaixo de 706 o laço de 4-20 mA abriu."
+    },
+    {
+      "nome": "disjuntor_ligado",
+      "rotulo": "Disjuntor ligado",
+      "endereco": 0,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "severidade": "info",
+      "_clp": "X0"
+    },
+    {
+      "nome": "disjuntor_falha",
+      "rotulo": "Proteção disparada",
+      "endereco": 1,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "severidade": "alta",
+      "_clp": "X1"
+    },
+    {
+      "nome": "modo_remoto",
+      "rotulo": "Comando em REMOTO",
+      "endereco": 2,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "severidade": "info",
+      "inverso": true,
+      "_clp": "X2"
+    },
+    {
+      "nome": "entrada_x3",
+      "rotulo": "Entrada X3",
+      "endereco": 3,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "entrada_x4",
+      "rotulo": "Entrada X4",
+      "endereco": 4,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "entrada_x5",
+      "rotulo": "Entrada X5",
+      "endereco": 5,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "entrada_x6",
+      "rotulo": "Entrada X6",
+      "endereco": 6,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "entrada_x7",
+      "rotulo": "Entrada X7",
+      "endereco": 7,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "saida_y0",
+      "rotulo": "Saída Y0",
+      "endereco": 0,
+      "funcao": "coil",
+      "tipo": "bool",
+      "severidade": "info"
+    },
+    {
+      "nome": "saida_y1",
+      "rotulo": "Saída Y1",
+      "endereco": 1,
+      "funcao": "coil",
+      "tipo": "bool",
+      "severidade": "info"
+    },
+    {
+      "nome": "saida_y2",
+      "rotulo": "Saída Y2",
+      "endereco": 2,
+      "funcao": "coil",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "saida_y3",
+      "rotulo": "Saída Y3",
+      "endereco": 3,
+      "funcao": "coil",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "saida_y4",
+      "rotulo": "Saída Y4",
+      "endereco": 4,
+      "funcao": "coil",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "saida_y5",
+      "rotulo": "Saída Y5",
+      "endereco": 5,
+      "funcao": "coil",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "saida_y6",
+      "rotulo": "Saída Y6",
+      "endereco": 6,
+      "funcao": "coil",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "saida_y7",
+      "rotulo": "Saída Y7",
+      "endereco": 7,
+      "funcao": "coil",
+      "tipo": "bool",
+      "oculto": true
+    }
+  ],
+  "alarmes": [
+    {
+      "tag": "nivel",
+      "min": 20,
+      "prioridade": "media",
+      "mensagem": "{nome}: nível baixo",
+      "atraso_s": 30
+    },
+    {
+      "tag": "nivel",
+      "min": 10,
+      "prioridade": "alta",
+      "mensagem": "{nome}: nível crítico",
+      "atraso_s": 30
+    },
+    {
+      "tag": "nivel",
+      "max": 97,
+      "prioridade": "media",
+      "mensagem": "{nome}: nível alto — risco de transbordo",
+      "atraso_s": 30
+    },
+    {
+      "tag": "nivel_bruto",
+      "min": 706,
+      "prioridade": "alta",
+      "mensagem": "{nome}: sensor de nível abaixo da faixa — laço de 4-20 mA aberto",
+      "atraso_s": 10
+    },
+    {
+      "tag": "nivel_bruto",
+      "max": 4145,
+      "prioridade": "media",
+      "mensagem": "{nome}: sensor de nível acima da faixa",
+      "atraso_s": 10
+    },
+    {
+      "tag": "disjuntor_falha",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: proteção do disjuntor disparada"
+    },
+    {
+      "tag": "modo_remoto",
+      "digital": true,
+      "inverso": true,
+      "prioridade": "baixa",
+      "mensagem": "{nome}: disjuntor em LOCAL — comando remoto bloqueado",
+      "atraso_s": 120
+    },
+    {
+      "comunicacao": true,
+      "prioridade": "alta",
+      "mensagem": "Sem comunicação com {nome}",
+      "atraso_s": 15
+    }
+  ],
+  "caixa_agua": {
+    "_uso": "Esqueleto da seção 'caixa_agua' da loja: o que é do CLP fica aqui, o volume e a altura do reservatório entram pela tela de Engenharia.",
+    "tag_nivel": "nivel",
+    "tag_isa": "TQ-01",
+    "capacidade_litros": null,
+    "altura_util_m": null,
+    "formato": "cilindrica",
+    "marcas": [
+      {
+        "valor": 97,
+        "rotulo": "alto",
+        "prioridade": "media"
+      },
+      {
+        "valor": 20,
+        "rotulo": "baixo",
+        "prioridade": "media"
+      },
+      {
+        "valor": 10,
+        "rotulo": "crítico",
+        "prioridade": "alta"
+      }
+    ]
+  },
+  "heartbeat": {
+    "endereco": 101,
+    "intervalo_s": 5,
+    "maximo": 30000,
+    "_uso": "Prova de vida para o watchdog do CLP, equivalente ao D101 do flow. Remova este bloco se o programa do CLP não vigia o supervisório."
+  },
+  "comandos": [
+    {
+      "nome": "ligar",
+      "rotulo": "Ligar disjuntor",
+      "descricao": "Escreve 1 em D100, como no comando do painel.",
+      "papel": "tecnico",
+      "funcao": "holding",
+      "endereco": 100,
+      "valor": 1,
+      "intertravamentos": [
+        {
+          "tag": "modo_remoto",
+          "igual": 1,
+          "senao": "CLP em LOCAL — o comando remoto está bloqueado na chave do painel"
+        },
+        {
+          "tag": "disjuntor_falha",
+          "igual": 0,
+          "senao": "Proteção disparada — rearme no painel antes de religar"
+        },
+        {
+          "tag": "disjuntor_ligado",
+          "igual": 0,
+          "senao": "O disjuntor já está ligado"
+        }
+      ],
+      "confirma_com": {
+        "tag": "disjuntor_ligado",
+        "igual": 1,
+        "prazo_s": 10
+      }
+    },
+    {
+      "nome": "desligar",
+      "rotulo": "Desligar disjuntor",
+      "descricao": "Escreve 2 em D100, como no comando do painel.",
+      "papel": "tecnico",
+      "funcao": "holding",
+      "endereco": 100,
+      "valor": 2,
+      "perigoso": true,
+      "intertravamentos": [
+        {
+          "tag": "modo_remoto",
+          "igual": 1,
+          "senao": "CLP em LOCAL — o comando remoto está bloqueado na chave do painel"
+        },
+        {
+          "tag": "disjuntor_ligado",
+          "igual": 1,
+          "senao": "O disjuntor já está desligado"
+        }
+      ],
+      "confirma_com": {
+        "tag": "disjuntor_ligado",
+        "igual": 0,
+        "prazo_s": 10
+      }
+    }
+  ],
+  "_comandos": "Reproduz a função 'Validar comando' do flow: exige REMOTO, sem falha e comunicação ok. O servidor revalida tudo antes de escrever e confere o resultado pela realimentação do CLP. Só funciona com seguranca.comandos_liberados = true na configuração da instalação."
+}

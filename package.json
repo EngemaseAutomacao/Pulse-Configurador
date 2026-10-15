@@ -1,0 +1,29 @@
+{
+  "name": "pulse-configurador",
+  "version": "3.2.0",
+  "description": "Engemase Pulse Configurador: supervisorio de energia, agua e grupo gerador via Modbus RTU no gateway da unidade",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "demo": "node server.js --sem-modbus --roteiro",
+    "bancada": "node server.js --config config.fx3u.json",
+    "bancada-demo": "node server.js --config config.fx3u.json --sem-modbus --roteiro",
+    "planta": "node server.js --config config.planta.json",
+    "planta-demo": "node server.js --config config.planta.json --sem-modbus --roteiro",
+    "teste": "node testes/executar.mjs && node testes/executar-comandos.mjs && node tools/gerar-demo.js && node testes/executar-demo.mjs",
+    "gerar-demo": "node tools/gerar-demo.js",
+    "orcamento": "node tools/orcamento.js",
+    "certificado": "node tools/gerar-certificado.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "express": "^4.19.2",
+    "modbus-serial": "^8.0.17",
+    "ws": "^8.18.0"
+  },
+  "_fontes": "As fontes em public/assets/fontes/ vêm de @fontsource/source-sans-3 e @fontsource/archivo (licença SIL OFL). Já acompanham o projeto: não é preciso instalar nada."
+}

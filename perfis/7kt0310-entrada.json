@@ -1,0 +1,392 @@
+{
+  "titulo": "Siemens SMART 7KT0310 — entrada geral",
+  "fabricante": "Siemens",
+  "modelo": "7KT0310",
+  "protocolo": "Modbus RTU",
+  "observacao": "Leitura em 3xxxx (função 04), endereço da norma (30001 = 0), float32 com a PALAVRA BAIXA PRIMEIRO (CDAB), no máximo 12 registradores por leitura (acima disso responde com CRC errado). Lido como ABCD a partir do endereço+1 os valores parecem certos (a metade alta é a da grandeza certa), mas a metade baixa vem da grandeza seguinte: a energia anda em degraus de 1024 kWh.",
+  "equipamento": {
+    "grupo": "energia",
+    "derivar": "harmonicas"
+  },
+  "conexao": {
+    "tipo": "rtu",
+    "porta_serial": "/dev/ttyUSB0",
+    "baud": 9600,
+    "paridade": "none",
+    "bits_dados": 8,
+    "bits_parada": 1,
+    "timeout_ms": 1000,
+    "intervalo_entre_quadros_ms": 20,
+    "_intervalo": "folga entre um pedido e o próximo na linha. O fluxo do Node-RED que lia estes medidores usava 200 ms; 20 ms já tira o medidor do limite da norma (4 ms a 9600) sem dobrar o tempo de varredura. Com CRC errado ou timeout em medidor bom, suba para 50."
+  },
+  "padrao": {
+    "funcao": "input",
+    "tipo": "float32",
+    "ordem_palavras": "CDAB",
+    "gap_maximo": 60,
+    "max_registradores": 12,
+    "faixa_fisica": [
+      -10000000,
+      10000000
+    ]
+  },
+  "tags": [
+    {
+      "nome": "tensao_an",
+      "rotulo": "Tensão V1-N",
+      "unidade": "V",
+      "endereco": 0,
+      "decimais": 1,
+      "fase": "a",
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "tensao_bn",
+      "rotulo": "Tensão V2-N",
+      "unidade": "V",
+      "endereco": 2,
+      "decimais": 1,
+      "fase": "b",
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "tensao_cn",
+      "rotulo": "Tensão V3-N",
+      "unidade": "V",
+      "endereco": 4,
+      "decimais": 1,
+      "fase": "c",
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "tensao_ab",
+      "rotulo": "Tensão V1-2",
+      "unidade": "V",
+      "endereco": 8,
+      "decimais": 1,
+      "fase": "a",
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "tensao_bc",
+      "rotulo": "Tensão V2-3",
+      "unidade": "V",
+      "endereco": 10,
+      "decimais": 1,
+      "fase": "b",
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "tensao_ca",
+      "rotulo": "Tensão V3-1",
+      "unidade": "V",
+      "endereco": 12,
+      "decimais": 1,
+      "fase": "c",
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "corrente_a",
+      "rotulo": "Corrente I1",
+      "unidade": "A",
+      "endereco": 16,
+      "decimais": 1,
+      "fase": "a",
+      "faixa_fisica": [
+        0,
+        10000
+      ]
+    },
+    {
+      "nome": "corrente_b",
+      "rotulo": "Corrente I2",
+      "unidade": "A",
+      "endereco": 18,
+      "decimais": 1,
+      "fase": "b",
+      "faixa_fisica": [
+        0,
+        10000
+      ]
+    },
+    {
+      "nome": "corrente_c",
+      "rotulo": "Corrente I3",
+      "unidade": "A",
+      "endereco": 20,
+      "decimais": 1,
+      "fase": "c",
+      "faixa_fisica": [
+        0,
+        10000
+      ]
+    },
+    {
+      "nome": "potencia_ativa",
+      "rotulo": "Potência ativa total",
+      "unidade": "kW",
+      "endereco": 42,
+      "decimais": 2,
+      "faixa_fisica": [
+        -10000,
+        10000
+      ]
+    },
+    {
+      "nome": "potencia_aparente",
+      "rotulo": "Potência aparente total",
+      "unidade": "kVA",
+      "endereco": 44,
+      "decimais": 2,
+      "faixa_fisica": [
+        -10000,
+        10000
+      ]
+    },
+    {
+      "nome": "potencia_reativa",
+      "rotulo": "Potência reativa total",
+      "unidade": "kvar",
+      "endereco": 46,
+      "decimais": 2,
+      "faixa_fisica": [
+        -10000,
+        10000
+      ]
+    },
+    {
+      "nome": "fp",
+      "rotulo": "Fator de potência",
+      "unidade": "",
+      "endereco": 54,
+      "decimais": 3,
+      "faixa_fisica": [
+        -1.001,
+        1.001
+      ]
+    },
+    {
+      "nome": "frequencia",
+      "rotulo": "Frequência",
+      "unidade": "Hz",
+      "endereco": 56,
+      "decimais": 2,
+      "faixa_fisica": [
+        0,
+        70
+      ]
+    },
+    {
+      "nome": "corrente_n",
+      "rotulo": "Corrente de neutro",
+      "unidade": "A",
+      "endereco": 122,
+      "decimais": 1,
+      "fase": "n",
+      "faixa_fisica": [
+        0,
+        10000
+      ]
+    },
+    {
+      "nome": "energia_ativa",
+      "rotulo": "Energia ativa importada",
+      "unidade": "kWh",
+      "endereco": 96,
+      "_fonte": "Total_kWh_imp: energia consumida. O 58 é a líquida (importada - exportada)",
+      "decimais": 0,
+      "lento": true,
+      "acumulador": true,
+      "faixa_fisica": [
+        0,
+        1000000000
+      ]
+    },
+    {
+      "nome": "energia_aparente",
+      "rotulo": "Energia aparente",
+      "unidade": "kVAh",
+      "endereco": 60,
+      "_fonte": "Total_kVAh (varredura do medidor geral: 182.398 kVAh ao lado de 173.657 kWh)",
+      "decimais": 0,
+      "lento": true,
+      "acumulador": true,
+      "faixa_fisica": [
+        0,
+        1000000000
+      ]
+    },
+    {
+      "nome": "energia_reativa",
+      "rotulo": "Energia reativa",
+      "unidade": "kvarh",
+      "endereco": 62,
+      "decimais": 0,
+      "lento": true,
+      "acumulador": true,
+      "oculto": true,
+      "faixa_fisica": [
+        0,
+        1000000000
+      ]
+    },
+    {
+      "nome": "demanda",
+      "rotulo": "Demanda máx. ativa",
+      "unidade": "kW",
+      "endereco": 64,
+      "decimais": 2,
+      "lento": true,
+      "faixa_fisica": [
+        0,
+        10000
+      ]
+    },
+    {
+      "nome": "thd_tensao",
+      "rotulo": "THD tensão V1",
+      "unidade": "%",
+      "endereco": 124,
+      "decimais": 1,
+      "lento": true,
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "thd_tensao_b",
+      "rotulo": "THD tensão V2",
+      "unidade": "%",
+      "endereco": 126,
+      "decimais": 1,
+      "lento": true,
+      "oculto": true,
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "thd_tensao_c",
+      "rotulo": "THD tensão V3",
+      "unidade": "%",
+      "endereco": 128,
+      "decimais": 1,
+      "lento": true,
+      "oculto": true,
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "thd_corrente",
+      "rotulo": "THD corrente I1",
+      "unidade": "%",
+      "endereco": 136,
+      "decimais": 1,
+      "lento": true,
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "thd_corrente_b",
+      "rotulo": "THD corrente I2",
+      "unidade": "%",
+      "endereco": 138,
+      "decimais": 1,
+      "lento": true,
+      "oculto": true,
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "thd_corrente_c",
+      "rotulo": "THD corrente I3",
+      "unidade": "%",
+      "endereco": 140,
+      "decimais": 1,
+      "lento": true,
+      "oculto": true,
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    { "nome": "corrente_harmonica_a", "rotulo": "Corrente harmônica I1", "unidade": "A", "calculada": true, "decimais": 1, "fase": "a", "oculto": true },
+    { "nome": "corrente_harmonica_b", "rotulo": "Corrente harmônica I2", "unidade": "A", "calculada": true, "decimais": 1, "fase": "b", "oculto": true },
+    { "nome": "corrente_harmonica_c", "rotulo": "Corrente harmônica I3", "unidade": "A", "calculada": true, "decimais": 1, "fase": "c", "oculto": true },
+    { "nome": "corrente_harmonica", "rotulo": "Corrente harmônica (maior fase)", "unidade": "A", "calculada": true, "decimais": 1, "oculto": true }
+  ],
+  "alarmes": [
+    {
+      "tag": "tensao_an",
+      "min": 198,
+      "max": 231,
+      "prioridade": "alta",
+      "mensagem": "{nome}: tensão V1-N fora da faixa",
+      "atraso_s": 5
+    },
+    {
+      "tag": "tensao_bn",
+      "min": 198,
+      "max": 231,
+      "prioridade": "alta",
+      "mensagem": "{nome}: tensão V2-N fora da faixa",
+      "atraso_s": 5
+    },
+    {
+      "tag": "tensao_cn",
+      "min": 198,
+      "max": 231,
+      "prioridade": "alta",
+      "mensagem": "{nome}: tensão V3-N fora da faixa",
+      "atraso_s": 5
+    },
+    {
+      "tag": "frequencia",
+      "min": 59.5,
+      "max": 60.5,
+      "prioridade": "alta",
+      "mensagem": "{nome}: frequência fora da faixa",
+      "_faixa": "59,5–60,5 Hz é a faixa do PRODIST (Módulo 8) para a rede voltar em até 30 s; por isso o atraso de 30 s",
+      "atraso_s": 30
+    },
+    {
+      "tag": "fp",
+      "min": 0.92,
+      "prioridade": "media",
+      "mensagem": "{nome}: fator de potência abaixo do mínimo",
+      "atraso_s": 60
+    },
+    {
+      "comunicacao": true,
+      "prioridade": "alta",
+      "mensagem": "Sem comunicação com {nome}",
+      "atraso_s": 15
+    }
+  ]
+}

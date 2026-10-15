@@ -1,0 +1,200 @@
+{
+  "titulo": "CLP de utilidades — reservatório e recalque",
+  "fabricante": "genérico",
+  "protocolo": "Modbus RTU",
+  "observacao": "Holding registers: 0-3 analógicos, 6-7 horímetro, 10 palavra de status.",
+  "equipamento": {
+    "grupo": "agua",
+    "varredura_a_cada": 2
+  },
+  "conexao": {
+    "tipo": "rtu",
+    "porta_serial": "/dev/ttyUSB0",
+    "baud": 9600,
+    "paridade": "none",
+    "bits_dados": 8,
+    "bits_parada": 1,
+    "timeout_ms": 800
+  },
+  "padrao": {
+    "funcao": "holding",
+    "tipo": "int16",
+    "gap_maximo": 4,
+    "max_registradores": 64
+  },
+  "tags": [
+    {
+      "nome": "nivel",
+      "rotulo": "Nível",
+      "unidade": "%",
+      "endereco": 0,
+      "escala": 0.1,
+      "decimais": 1
+    },
+    {
+      "nome": "coluna",
+      "rotulo": "Coluna d'água",
+      "unidade": "m",
+      "endereco": 1,
+      "escala": 0.01,
+      "decimais": 2
+    },
+    {
+      "nome": "vazao_entrada",
+      "rotulo": "Vazão de entrada",
+      "unidade": "m³/h",
+      "endereco": 2,
+      "escala": 0.1,
+      "decimais": 1
+    },
+    {
+      "nome": "pressao_recalque",
+      "rotulo": "Pressão de recalque",
+      "unidade": "mca",
+      "endereco": 3,
+      "escala": 0.1,
+      "decimais": 1
+    },
+    {
+      "nome": "horas_bomba",
+      "rotulo": "Horímetro da bomba",
+      "unidade": "h",
+      "endereco": 6,
+      "tipo": "uint32",
+      "decimais": 0,
+      "lento": true
+    },
+    {
+      "nome": "status",
+      "rotulo": "Palavra de status",
+      "unidade": "",
+      "endereco": 10,
+      "tipo": "uint16",
+      "decimais": 0,
+      "oculto": true
+    },
+    {
+      "nome": "bomba_ligada",
+      "rotulo": "Bomba de recalque em funcionamento",
+      "endereco": 10,
+      "bit": 0,
+      "tipo": "bool",
+      "severidade": "info"
+    },
+    {
+      "nome": "bomba_falha",
+      "rotulo": "Falha da bomba de recalque",
+      "endereco": 10,
+      "bit": 1,
+      "tipo": "bool",
+      "severidade": "alta"
+    },
+    {
+      "nome": "boia_baixo",
+      "rotulo": "Boia de nível baixo atuada",
+      "endereco": 10,
+      "bit": 2,
+      "tipo": "bool",
+      "severidade": "media"
+    },
+    {
+      "nome": "boia_alto",
+      "rotulo": "Boia de nível alto atuada",
+      "endereco": 10,
+      "bit": 3,
+      "tipo": "bool",
+      "severidade": "media"
+    },
+    {
+      "nome": "sensor_falha",
+      "rotulo": "Falha do sensor de nível",
+      "endereco": 10,
+      "bit": 4,
+      "tipo": "bool",
+      "severidade": "alta"
+    },
+    {
+      "nome": "modo_automatico",
+      "rotulo": "Bomba em automático",
+      "endereco": 10,
+      "bit": 5,
+      "tipo": "bool",
+      "severidade": "info",
+      "inverso": true
+    }
+  ],
+  "alarmes": [
+    {
+      "tag": "nivel",
+      "min": 15,
+      "prioridade": "alta",
+      "mensagem": "{nome} em nível crítico",
+      "atraso_s": 30
+    },
+    {
+      "tag": "nivel",
+      "min": 30,
+      "prioridade": "media",
+      "mensagem": "{nome} em nível baixo",
+      "atraso_s": 60
+    },
+    {
+      "tag": "nivel",
+      "max": 97,
+      "prioridade": "media",
+      "mensagem": "{nome} em nível alto — risco de transbordo",
+      "atraso_s": 30
+    },
+    {
+      "tag": "bomba_falha",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "Falha da bomba de recalque"
+    },
+    {
+      "tag": "sensor_falha",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "Falha do sensor de nível"
+    },
+    {
+      "tag": "modo_automatico",
+      "digital": true,
+      "inverso": true,
+      "prioridade": "baixa",
+      "mensagem": "Bomba fora do automático",
+      "atraso_s": 120
+    },
+    {
+      "comunicacao": true,
+      "prioridade": "alta",
+      "mensagem": "Sem comunicação com {nome}",
+      "atraso_s": 15
+    }
+  ],
+  "caixa_agua": {
+    "_uso": "Esqueleto da seção 'caixa_agua' da loja: o que é do CLP fica aqui, o volume e a altura do reservatório entram pela tela de Engenharia.",
+    "tag_nivel": "nivel",
+    "tag_isa": "TQ-01",
+    "capacidade_litros": null,
+    "altura_util_m": null,
+    "formato": "cilindrica",
+    "marcas": [
+      {
+        "valor": 97,
+        "rotulo": "alto",
+        "prioridade": "media"
+      },
+      {
+        "valor": 20,
+        "rotulo": "baixo",
+        "prioridade": "media"
+      },
+      {
+        "valor": 10,
+        "rotulo": "crítico",
+        "prioridade": "alta"
+      }
+    ]
+  }
+}

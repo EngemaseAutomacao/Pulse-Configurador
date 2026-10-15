@@ -1,0 +1,102 @@
+{
+  "_leia": "Bancada com um CLP Mitsubishi FX3U, convertida do flow Node-RED. Suba com: npm run bancada (Windows) ou node server.js --config config.fx3u.json. Confira a porta COM antes: Gerenciador de Dispositivos > Portas (COM e LPT).",
+  "planta": "Bancada — CLP FX3U",
+  "porta_http": 8080,
+  "endereco_http": "0.0.0.0",
+  "intervalo_leitura_ms": 1000,
+  "varreduras_por_leitura_lenta": 20,
+  "seguranca": {
+    "sessao_horas": 12,
+    "tentativas_ate_bloquear": 5,
+    "bloqueio_minutos": 15,
+    "escrita_modbus_liberada": false,
+    "_nota": "O heartbeat declarado no perfil continua sendo escrito mesmo com esta chave desligada — ela trava apenas a escrita manual pelo terminal de engenharia.",
+    "comandos_liberados": true,
+    "_comandos": "Libera os botões de acionamento declarados nos perfis (ex.: ligar/desligar disjuntor). Cada comando ainda passa pelos intertravamentos do perfil, exige o papel declarado e fica registrado na auditoria. Deixe FALSE em instalação só de monitoramento."
+  },
+  "_telas": "Força telas no menu mesmo antes de o equipamento existir: a tela aparece com o guia de instalação em vez de sumir. Use false para esconder uma tela que a loja não usa.",
+  "telas": {
+    "gerador": true
+  },
+  "historico": {
+    "intervalo_gravacao_s": 15,
+    "retencao_dias": 90,
+    "arquivo": "dados/bancada.db"
+  },
+  "medidores": [
+    {
+      "id": "clp",
+      "perfil": "clp-fx3u-disjuntor",
+      "tag_isa": "CLP-01",
+      "nome": "CLP FX3U",
+      "conexao": {
+        "unit_id": 1,
+        "timeout_ms": 1000,
+        "tipo": "rtu",
+        "porta_serial": "COM7",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1
+      }
+    },
+    {
+      "id": "novo_equipamento",
+      "nome": "Novo equipamento",
+      "conexao": {
+        "unit_id": 2,
+        "tipo": "tcp",
+        "host": "192.168.8.20",
+        "porta": 502
+      },
+      "perfil": "dse-8620"
+    }
+  ],
+  "caixa_agua": {
+    "medidor": "clp",
+    "tag_nivel": "nivel",
+    "tag_isa": "TQ-01",
+    "capacidade_litros": 10000,
+    "altura_util_m": 2,
+    "formato": "cilindrica",
+    "marcas": [
+      {
+        "valor": 97,
+        "rotulo": "alto",
+        "prioridade": "media"
+      },
+      {
+        "valor": 20,
+        "rotulo": "baixo",
+        "prioridade": "media"
+      },
+      {
+        "valor": 10,
+        "rotulo": "crítico",
+        "prioridade": "alta"
+      }
+    ]
+  },
+  "alarmes": [],
+  "gerador": {
+    "teste_a_cada_dias": 7,
+    "modo_automatico": 1,
+    "bateria_minima_v": 23,
+    "bateria_repouso_min_v": 25.5,
+    "bateria_partida_min_v": 20,
+    "bateria_partida_critica_v": 18,
+    "marcas": [
+      {
+        "valor": 50,
+        "rotulo": "reserva",
+        "prioridade": "media"
+      },
+      {
+        "valor": 25,
+        "rotulo": "crítico",
+        "prioridade": "alta"
+      }
+    ],
+    "medidor": "novo_equipamento"
+  }
+}

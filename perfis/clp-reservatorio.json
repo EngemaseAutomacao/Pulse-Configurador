@@ -1,0 +1,67 @@
+{
+  "titulo": "15CLP1 — CLP do reservatório (sensor de nível 4-20 mA)",
+  "fabricante": "Mitsubishi",
+  "modelo": "FX3U-14MT",
+  "protocolo": "Modbus RTU escravo (RS-485, barramento dos medidores)",
+  "observacao": "O CLP converte o sensor de nível e deixa a leitura bruta em D212, igual ao da bancada — a escala é a mesma. Mapa em PLC_15CLP1.md.",
+  "equipamento": {
+    "grupo": "agua"
+  },
+  "conexao": {
+    "tipo": "rtu",
+    "interface": "rs485",
+    "porta_serial": "COM4",
+    "baud": 9600,
+    "paridade": "none",
+    "bits_dados": 8,
+    "bits_parada": 1,
+    "unit_id": 10,
+    "timeout_ms": 1000
+  },
+  "padrao": {
+    "funcao": "holding",
+    "tipo": "uint16",
+    "gap_maximo": 4,
+    "max_registradores": 32
+  },
+  "tags": [
+    {
+      "nome": "nivel",
+      "rotulo": "Nível da caixa d'água",
+      "unidade": "%",
+      "endereco": 212,
+      "escala": 0.029949087,
+      "offset": -22.641509,
+      "limitar": [0, 100],
+      "decimais": 1,
+      "_clp": "D212 — leitura bruta do canal analógico; 756 = 4 mA, 4095 = 20 mA"
+    },
+    { "nome": "nivel_bruto", "rotulo": "Leitura bruta do sensor", "unidade": "", "endereco": 212, "decimais": 0 },
+    { "nome": "sensor_falha", "rotulo": "Sensor de nível fora da faixa", "endereco": 213, "decimais": 0, "tipo": "uint16",
+      "_clp": "D213 — o CLP põe 1 quando D212 sai de 706…4145 por mais de 5 s" },
+    { "nome": "vida_clp", "rotulo": "Contador de vida do 15CLP1", "endereco": 214, "decimais": 0, "oculto": true,
+      "_clp": "D214 — incrementa a cada segundo; parado = programa travado" }
+  ],
+  "alarmes": [
+    { "tag": "nivel", "min": 20, "prioridade": "media", "mensagem": "{nome}: nível baixo", "atraso_s": 30 },
+    { "tag": "nivel", "min": 10, "prioridade": "alta", "mensagem": "{nome}: nível crítico", "atraso_s": 30 },
+    { "tag": "nivel", "max": 97, "prioridade": "media", "mensagem": "{nome}: nível alto — risco de transbordo", "atraso_s": 30 },
+    { "tag": "nivel_bruto", "min": 706, "prioridade": "alta", "mensagem": "{nome}: sensor de nível abaixo da faixa — laço de 4-20 mA aberto", "atraso_s": 10 },
+    { "tag": "nivel_bruto", "max": 4145, "prioridade": "media", "mensagem": "{nome}: sensor de nível acima da faixa", "atraso_s": 10 },
+    { "tag": "sensor_falha", "digital": true, "prioridade": "alta", "mensagem": "{nome}: CLP indica sensor de nível em falha" },
+    { "comunicacao": true, "prioridade": "alta", "mensagem": "Sem comunicação com {nome}", "atraso_s": 15 }
+  ],
+  "caixa_agua": {
+    "_uso": "Capacidade e altura do reservatório entram pela tela de Engenharia.",
+    "tag_nivel": "nivel",
+    "tag_isa": "TQ-01",
+    "capacidade_litros": null,
+    "altura_util_m": null,
+    "formato": "cilindrica",
+    "marcas": [
+      { "valor": 97, "rotulo": "alto", "prioridade": "media" },
+      { "valor": 20, "rotulo": "baixo", "prioridade": "media" },
+      { "valor": 10, "rotulo": "crítico", "prioridade": "alta" }
+    ]
+  }
+}

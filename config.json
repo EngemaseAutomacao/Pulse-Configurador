@@ -1,0 +1,445 @@
+{
+  "_leia": "Este arquivo descreve UMA loja. O mapa de registradores de cada modelo fica em perfis/. Para uma loja sem caixa d'água, basta remover o equipamento clp e a seção caixa_agua.",
+  "planta": "Loja 042 — Centro",
+  "porta_http": 8080,
+  "endereco_http": "0.0.0.0",
+  "intervalo_leitura_ms": 2000,
+  "varreduras_por_leitura_lenta": 20,
+  "seguranca": {
+    "sessao_horas": 12,
+    "tentativas_ate_bloquear": 5,
+    "bloqueio_minutos": 15,
+    "escrita_modbus_liberada": false,
+    "_nota": "escrita_modbus_liberada permite o terminal de engenharia escrever em registrador. Mantenha desligado, exceto durante comissionamento acompanhado."
+  },
+  "historico": {
+    "intervalo_gravacao_s": 15,
+    "retencao_dias": 90,
+    "arquivo": "dados/historico.db"
+  },
+  "medidores": [
+    {
+      "id": "geral",
+      "perfil": "7kt0310-entrada",
+      "tag_isa": "QGBT-01",
+      "nome": "Entrada geral",
+      "principal": true,
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 1,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 630
+        }
+      }
+    },
+    {
+      "id": "padaria",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "QD-02",
+      "nome": "Padaria",
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 2,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 250
+        }
+      }
+    },
+    {
+      "id": "acougue",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "QD-03",
+      "nome": "Açougue",
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 3,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 100
+        }
+      }
+    },
+    {
+      "id": "frios",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "QD-04",
+      "nome": "Ilhas de frios",
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 4,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 125
+        }
+      }
+    },
+    {
+      "id": "refrigerados",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "QD-05",
+      "nome": "Refrigerados",
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 5,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 160
+        }
+      }
+    },
+    {
+      "id": "congelados",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "QD-06",
+      "nome": "Congelados",
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 6,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 200
+        }
+      }
+    },
+    {
+      "id": "climatizacao",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "QD-07",
+      "nome": "Climatização",
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 7,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 250
+        }
+      }
+    },
+    {
+      "id": "iluminacao",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "QD-08",
+      "nome": "Iluminação",
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 8,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 125
+        }
+      }
+    },
+    {
+      "id": "carregadores",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "QD-09",
+      "nome": "Carregadores",
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 9,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 100
+        }
+      }
+    },
+    {
+      "id": "clp",
+      "perfil": "clp-utilidades",
+      "tag_isa": "TQ-01",
+      "nome": "Caixa d'água",
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 10,
+        "timeout_ms": 800
+      }
+    },
+    {
+      "id": "gmg",
+      "perfil": "gerador-generico",
+      "tag_isa": "GMG-01",
+      "nome": "Grupo gerador diesel",
+      "conexao": {
+        "porta_serial": "/dev/ttyUSB0",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 11,
+        "timeout_ms": 800
+      }
+    }
+  ],
+  "unifilar": {
+    "entrada": {
+      "rotulo": "Concessionária · entrada geral",
+      "medidor": "geral"
+    },
+    "barramento": {
+      "rotulo": "Barra QGBT · 380/220 V"
+    },
+    "gerador": {
+      "medidor": "gmg",
+      "rotulo": "Grupo gerador · 380 V"
+    },
+    "saidas": [
+      {
+        "medidor": "padaria",
+        "rotulo": "Padaria",
+        "disjuntor": "250 A",
+        "tag_isa": "QD-02"
+      },
+      {
+        "medidor": "acougue",
+        "rotulo": "Açougue",
+        "disjuntor": "100 A",
+        "tag_isa": "QD-03"
+      },
+      {
+        "medidor": "frios",
+        "rotulo": "Ilhas de frios",
+        "disjuntor": "125 A",
+        "tag_isa": "QD-04"
+      },
+      {
+        "medidor": "refrigerados",
+        "rotulo": "Refrigerados",
+        "disjuntor": "160 A",
+        "tag_isa": "QD-05"
+      },
+      {
+        "medidor": "congelados",
+        "rotulo": "Congelados",
+        "disjuntor": "200 A",
+        "tag_isa": "QD-06"
+      },
+      {
+        "medidor": "climatizacao",
+        "rotulo": "Climatização",
+        "disjuntor": "250 A",
+        "tag_isa": "QD-07"
+      },
+      {
+        "medidor": "iluminacao",
+        "rotulo": "Iluminação",
+        "disjuntor": "125 A",
+        "tag_isa": "QD-08"
+      },
+      {
+        "medidor": "carregadores",
+        "rotulo": "Carregadores",
+        "disjuntor": "100 A",
+        "tag_isa": "QD-09"
+      }
+    ]
+  },
+  "caixa_agua": {
+    "medidor": "clp",
+    "tag_nivel": "nivel",
+    "capacidade_litros": 20000,
+    "altura_util_m": 2.5,
+    "formato": "cilindrica",
+    "marcas": [
+      {
+        "valor": 97,
+        "rotulo": "alto",
+        "prioridade": "media"
+      },
+      {
+        "valor": 60,
+        "rotulo": "partida da bomba",
+        "prioridade": "info"
+      },
+      {
+        "valor": 30,
+        "rotulo": "baixo",
+        "prioridade": "media"
+      },
+      {
+        "valor": 15,
+        "rotulo": "crítico",
+        "prioridade": "alta"
+      }
+    ]
+  },
+  "gerador": {
+    "medidor": "gmg",
+    "tag_nivel": "nivel_diesel",
+    "potencia_nominal_kw": 180,
+    "capacidade_tanque_litros": 500,
+    "consumo_litros_hora": 38,
+    "_indicadores": "Parâmetros dos indicadores: modo_automatico é o código do modo que conta como disponível; bateria_minima_v e bateria_repouso_min_v vêm do manual da bateria; teste_a_cada_dias alarma quando o grupo passa tempo demais sem partir.",
+    "modo_automatico": 1,
+    "bateria_minima_v": 23,
+    "bateria_repouso_min_v": 25.5,
+    "teste_a_cada_dias": 7,
+    "estados": [
+      "Parado",
+      "Pré-aquecendo",
+      "Partindo",
+      "Em carga",
+      "Resfriando",
+      "Em falha"
+    ],
+    "modos": [
+      "Manual",
+      "Automático",
+      "Teste"
+    ],
+    "falhas": [
+      "falha_partida",
+      "falha_sobrevelocidade",
+      "falha_pressao_oleo",
+      "falha_temperatura",
+      "falha_bateria",
+      "falha_combustivel",
+      "falha_emergencia",
+      "falha_carregador",
+      "falha_sobrecarga",
+      "falha_tensao"
+    ],
+    "marcas": [
+      {
+        "valor": 50,
+        "rotulo": "reserva",
+        "prioridade": "media"
+      },
+      {
+        "valor": 25,
+        "rotulo": "crítico",
+        "prioridade": "alta"
+      }
+    ]
+  },
+  "alarmes": [
+    {
+      "tag": "geral.corrente_a",
+      "max": 630,
+      "prioridade": "alta",
+      "mensagem": "Entrada: sobrecarga na fase 1",
+      "atraso_s": 10
+    },
+    {
+      "tag": "geral.corrente_b",
+      "max": 630,
+      "prioridade": "alta",
+      "mensagem": "Entrada: sobrecarga na fase 2",
+      "atraso_s": 10
+    },
+    {
+      "tag": "geral.corrente_c",
+      "max": 630,
+      "prioridade": "alta",
+      "mensagem": "Entrada: sobrecarga na fase 3",
+      "atraso_s": 10
+    },
+    {
+      "tag": "geral.corrente_n",
+      "max": 190,
+      "prioridade": "media",
+      "mensagem": "Corrente de neutro elevada",
+      "atraso_s": 30
+    },
+    {
+      "tag": "geral.demanda",
+      "max": 320,
+      "prioridade": "media",
+      "mensagem": "Demanda acima do contratado"
+    },
+    {
+      "tag": "geral.thd_tensao",
+      "max": 8,
+      "prioridade": "baixa",
+      "mensagem": "THD de tensão acima do limite",
+      "atraso_s": 60
+    },
+    {
+      "tag": "geral.thd_corrente",
+      "max": 15,
+      "prioridade": "baixa",
+      "mensagem": "THD de corrente acima do limite",
+      "atraso_s": 60
+    },
+    {
+      "tag": "frios.potencia_ativa",
+      "min": 1,
+      "prioridade": "alta",
+      "mensagem": "Ilhas de frios sem consumo — possível desarme",
+      "atraso_s": 60
+    },
+    {
+      "tag": "refrigerados.potencia_ativa",
+      "min": 1,
+      "prioridade": "alta",
+      "mensagem": "Refrigerados sem consumo — possível desarme",
+      "atraso_s": 60
+    },
+    {
+      "tag": "congelados.potencia_ativa",
+      "min": 1,
+      "prioridade": "alta",
+      "mensagem": "Congelados sem consumo — possível desarme",
+      "atraso_s": 60
+    }
+  ]
+}

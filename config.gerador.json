@@ -1,0 +1,68 @@
+{
+  "_leia": "Bancada só do grupo gerador, para ver os indicadores funcionando sem CLP nenhum: node server.js --config config.gerador.json --sem-modbus --roteiro. Em campo, troque a porta serial e o unit_id pelos da USCA e escolha o perfil da marca instalada.",
+  "planta": "Bancada — grupo gerador e indicadores",
+  "porta_http": 8080,
+  "endereco_http": "0.0.0.0",
+  "intervalo_leitura_ms": 1000,
+  "varreduras_por_leitura_lenta": 20,
+  "seguranca": {
+    "sessao_horas": 12,
+    "tentativas_ate_bloquear": 5,
+    "bloqueio_minutos": 15,
+    "escrita_modbus_liberada": false,
+    "comandos_liberados": false
+  },
+  "historico": {
+    "intervalo_gravacao_s": 15,
+    "retencao_dias": 90,
+    "arquivo": "dados/gerador.db"
+  },
+  "medidores": [
+    {
+      "id": "gmg",
+      "perfil": "gerador-generico",
+      "tag_isa": "GMG-01",
+      "nome": "Grupo gerador 180 kVA",
+      "conexao": {
+        "porta_serial": "COM8",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 11,
+        "timeout_ms": 800
+      }
+    }
+  ],
+  "gerador": {
+    "medidor": "gmg",
+    "tag_nivel": "nivel_diesel",
+    "potencia_nominal_kw": 180,
+    "capacidade_tanque_litros": 500,
+    "consumo_litros_hora": 38,
+    "_indicadores": "modo_automatico é o código do modo que conta como disponível; bateria_minima_v e bateria_repouso_min_v vêm do manual da bateria (24 V nominal); teste_a_cada_dias gera alarme quando o grupo passa tempo demais sem partir.",
+    "modo_automatico": 1,
+    "bateria_minima_v": 23,
+    "bateria_repouso_min_v": 25.5,
+    "teste_a_cada_dias": 7,
+    "estados": ["Parado", "Pré-aquecendo", "Partindo", "Em carga", "Resfriando", "Em falha"],
+    "modos": ["Manual", "Automático", "Teste"],
+    "falhas": [
+      "falha_partida",
+      "falha_sobrevelocidade",
+      "falha_pressao_oleo",
+      "falha_temperatura",
+      "falha_bateria",
+      "falha_combustivel",
+      "falha_emergencia",
+      "falha_carregador",
+      "falha_sobrecarga",
+      "falha_tensao"
+    ],
+    "marcas": [
+      { "valor": 50, "rotulo": "reserva", "prioridade": "media" },
+      { "valor": 25, "rotulo": "crítico", "prioridade": "alta" }
+    ]
+  },
+  "alarmes": []
+}

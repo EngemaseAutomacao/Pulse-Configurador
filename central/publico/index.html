@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Central de Operação</title>
+<link rel="icon" type="image/png" href="/icone.png">
+<style>
+  :root {
+    --painel: #c5c9c3; --tela: #e8eae5; --grafite: #23282a; --tinta: #1a1f1c; --apagado: #5b625c;
+    --linha: #b3b8b1; --critico: #c1121f; --atencao: #b37700; --ok: #1c7a4f; --info: #1f5c99;
+    --titulo: "Archivo", "Segoe UI", system-ui, sans-serif;
+    --corpo: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--painel); color: var(--tinta); font: 15px/1.4 var(--corpo); }
+  header { background: var(--grafite); color: #f2f3f0; padding: 12px 20px; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  header h1 { margin: 0; font: 700 18px var(--titulo); letter-spacing: .06em; text-transform: uppercase; }
+  header .hora { color: #b9bfb7; font-variant-numeric: tabular-nums; font-size: 13px; margin-left: auto; }
+  header nav { display: flex; gap: 4px; align-self: center; }
+  header .conta { color: #b9bfb7; font-size: 13px; overflow-wrap: anywhere; }
+  header .conta a { color: #f2f3f0; margin-left: 8px; }
+  header nav a { color: #c9cec7; text-decoration: none; padding: 6px 12px; font-weight: 600; border-bottom: 3px solid transparent; }
+  header nav a[aria-current="page"] { color: #fff; border-bottom-color: #d99000; }
+  main { padding: 16px 20px 32px; max-width: 1400px; margin: 0 auto; }
+  .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--tela); border: 1px solid var(--linha); padding: 12px 14px; }
+  .kpi .rot { font: 600 11px var(--corpo); letter-spacing: .08em; text-transform: uppercase; color: var(--apagado); }
+  .kpi .val { font: 700 30px var(--titulo); font-variant-numeric: tabular-nums; }
+  .lojas { display: grid; gap: 10px; }
+  .loja { background: var(--tela); border: 1px solid var(--linha); border-left: 6px solid var(--linha); padding: 12px 14px;
+          display: grid; grid-template-columns: 200px 1fr 160px auto; gap: 14px; align-items: center; }
+  .loja.sem_contato, .loja.dados_parados { border-left-color: var(--critico); }
+  .loja.falha_equipamento, .loja.alarme { border-left-color: var(--atencao); }
+  .loja.normal { border-left-color: var(--ok); }
+  .nome { font: 700 16px var(--titulo); }
+  .planta { color: var(--apagado); font-size: 13px; }
+  .selo { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; margin-top: 4px; }
+  .selo i { font-style: normal; width: 18px; height: 18px; display: inline-grid; place-items: center; border-radius: 50%; color: #fff; font-size: 12px; }
+  .sem_contato .selo i, .dados_parados .selo i { background: var(--critico); }
+  .falha_equipamento .selo i, .alarme .selo i { background: var(--atencao); }
+  .normal .selo i { background: var(--ok); }
+  .aguardando .selo i { background: var(--apagado); }
+  .detalhe { font-size: 14px; min-width: 0; }
+  .detalhe ul { margin: 4px 0 0; padding-left: 18px; }
+  .detalhe li { overflow-wrap: anywhere; }
+  .prio-alta { color: var(--critico); font-weight: 600; }
+  .erro { color: var(--critico); }
+  .contato { font-size: 13px; color: var(--apagado); font-variant-numeric: tabular-nums; }
+  a.botao { display: inline-block; padding: 8px 14px; border: 1px solid var(--grafite); color: var(--grafite);
+            text-decoration: none; font-weight: 600; background: #f4f5f2; white-space: nowrap; }
+  a.botao:hover { background: var(--grafite); color: #fff; }
+  .vazio { background: var(--tela); border: 1px dashed var(--linha); padding: 24px; text-align: center; color: var(--apagado); }
+  .aviso { background: #fbeaea; border: 1px solid var(--critico); color: var(--critico); padding: 8px 12px; margin-bottom: 12px; display: none; }
+  @media (max-width: 860px) {
+    .loja { grid-template-columns: 1fr; }
+    main, header { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Central de Operação</h1>
+  <nav aria-label="Telas da central">
+    <a href="/" aria-current="page">Lojas</a>
+    <a href="/alarmes" id="nav-alarmes">Alarmes</a>
+    <a href="/acessos" id="nav-acessos" hidden>Acessos</a>
+  </nav>
+  <span class="hora" id="hora">—</span>
+  <span class="conta" id="conta" hidden></span>
+</header>
+<main>
+  <div class="aviso" id="aviso">Sem resposta do servidor da central. Os dados abaixo podem estar desatualizados.</div>
+  <section class="resumo" aria-label="Resumo">
+    <div class="kpi"><div class="rot">Lojas</div><div class="val" id="k-total">—</div></div>
+    <div class="kpi"><div class="rot">Em comunicação</div><div class="val" id="k-ok">—</div></div>
+    <div class="kpi"><div class="rot">Sem contato</div><div class="val" id="k-sem">—</div></div>
+    <div class="kpi"><div class="rot">Alarmes ativos</div><div class="val" id="k-alarmes">—</div></div>
+  </section>
+  <section class="lojas" id="lojas" aria-live="polite"></section>
+</main>
+<script>
+  // tudo o que vem das lojas entra como texto (textContent), nunca como HTML
+  const el = (tag, props = {}, ...filhos) => {
+    const n = document.createElement(tag);
+    Object.assign(n, props);
+    for (const f of filhos) if (f != null) n.append(f);
+    return n;
+  };
+  const SELO = {
+    sem_contato: ['!', 'Sem contato'],
+    dados_parados: ['!', 'Coleta parada'],
+    falha_equipamento: ['!', 'Equipamento sem resposta'],
+    alarme: ['!', 'Alarme ativo'],
+    normal: ['✓', 'Normal'],
+    aguardando: ['…', 'Aguardando'],
+  };
+  const PESO = { sem_contato: 0, dados_parados: 1, falha_equipamento: 2, alarme: 3, aguardando: 4, normal: 5 };
+  const ha = (ts, agora) => {
+    if (!ts) return 'nunca';
+    const s = Math.max(0, Math.round((agora - ts) / 1000));
+    if (s < 60) return `há ${s} s`;
+    if (s < 3600) return `há ${Math.round(s / 60)} min`;
+    if (s < 86400) return `há ${Math.round(s / 3600)} h`;
+    return new Date(ts).toLocaleString('pt-BR');
+  };
+
+  function desenhar({ agora, lojas }) {
+    document.getElementById('hora').textContent = new Date(agora).toLocaleString('pt-BR');
+    const alarmes = lojas.reduce((t, l) => t + (l.dados && l.status !== 'sem_contato' ? l.dados.alarmes.length : 0), 0);
+    document.getElementById('k-total').textContent = lojas.length;
+    document.getElementById('k-ok').textContent = lojas.filter((l) => l.status !== 'sem_contato' && l.status !== 'aguardando').length;
+    document.getElementById('k-sem').textContent = lojas.filter((l) => l.status === 'sem_contato').length;
+    document.getElementById('k-alarmes').textContent = alarmes;
+    document.getElementById('nav-alarmes').textContent = alarmes ? `Alarmes (${alarmes})` : 'Alarmes';
+
+    const alvo = document.getElementById('lojas');
+    alvo.replaceChildren();
+    if (!lojas.length) {
+      alvo.append(el('div', { className: 'vazio', textContent: 'Nenhuma loja cadastrada. No servidor: sudo bash /opt/central/vpn-novo.sh loja <id> "<nome>"' }));
+      return;
+    }
+    for (const l of [...lojas].sort((a, b) => PESO[a.status] - PESO[b.status] || a.nome.localeCompare(b.nome))) {
+      const [icone, texto] = SELO[l.status] || SELO.aguardando;
+      const d = l.dados;
+      const detalhe = el('div', { className: 'detalhe' });
+      if (l.status === 'sem_contato') detalhe.append(el('div', { className: 'erro', textContent: l.erro || 'sem resposta' }));
+      if (d && l.status !== 'sem_contato') {
+        detalhe.append(el('div', { textContent: `${d.online} de ${d.equipamentos} equipamento(s) em comunicação`
+          + (d.simulado ? ' · SIMULAÇÃO' : '') }));
+        if (l.status === 'dados_parados') detalhe.append(el('div', { className: 'erro', textContent: `última leitura ${ha(d.ts, agora)}` }));
+        if (d.sem_comunicacao.length) detalhe.append(el('div', { textContent: `sem resposta: ${d.sem_comunicacao.join(', ')}` }));        if (d.alarmes.length) {
+          const ul = el('ul');
+          for (const a of d.alarmes.slice(0, 4)) {
+            ul.append(el('li', { className: a.prioridade === 'alta' ? 'prio-alta' : '',
+              textContent: `${a.mensagem}${a.reconhecido ? ' (reconhecido)' : ''}` }));
+          }
+          if (d.alarmes.length > 4) ul.append(el('li', { textContent: `+ ${d.alarmes.length - 4} alarme(s)` }));
+          detalhe.append(ul);
+        }
+      }
+      alvo.append(el('article', { className: `loja ${l.status}` },
+        el('div', {},
+          el('div', { className: 'nome', textContent: l.nome }),
+          el('div', { className: 'planta', textContent: d?.planta || l.id }),
+          el('div', { className: 'selo' }, el('i', { textContent: icone, ariaHidden: 'true' }), texto)),
+        detalhe,
+        el('div', { className: 'contato', textContent: `contato ${ha(l.contato, agora)}` }),
+        el('a', { className: 'botao', href: l.painel, target: '_blank', rel: 'noopener', textContent: 'Abrir configurador' })));
+    }
+  }
+
+  async function atualizar() {
+    try {
+      const r = await fetch('/api/lojas', { cache: 'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      desenhar(await r.json());
+      document.getElementById('aviso').style.display = 'none';
+    } catch {
+      document.getElementById('aviso').style.display = 'block';
+    }
+  }
+  atualizar();
+  setInterval(atualizar, 5000);
+
+  // quem entrou pela internet: e-mail, sair e (administrador) a tela de acessos
+  fetch('/api/eu', { cache: 'no-store' }).then((r) => r.json()).then((eu) => {
+    document.getElementById('nav-acessos').hidden = !eu.admin;
+    if (!eu.email) return;
+    const conta = document.getElementById('conta');
+    const sair = el('a', { href: '/oauth2/sign_out?rd=%2F', textContent: 'Sair' });
+    conta.replaceChildren(eu.email, sair);
+    conta.hidden = false;
+  }).catch(() => {});
+</script>
+</body>
+</html>

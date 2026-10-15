@@ -1,0 +1,91 @@
+{
+  "herda": "clp-fx3u-disjuntor-protecao",
+  "titulo": "7CLP1 — CLP da subestação (disjuntor de MT + ponte para o gerador DSE8620)",
+  "modelo": "FX3U-14MT",
+  "protocolo": "Modbus RTU escravo (RS-485)",
+  "observacao": "Disjuntor e relé 7SR5 por entradas/saídas; o DSE8620 é lido pelo próprio CLP na RS-232 e aparece como equipamento separado (perfil dse-8620-via-clp). Mapa completo em PLC_7CLP1.md.",
+  "tags_removidas": ["nivel", "nivel_bruto", "entrada_x4", "entrada_x5", "entrada_x6", "entrada_x7", "saida_y0", "saida_y1"],
+  "caixa_agua": null,
+  "equipamento": {
+    "grupo": "subestacao"
+  },
+  "conexao": {
+    "tipo": "rtu",
+    "interface": "rs485",
+    "porta_serial": "COM3",
+    "baud": 19200,
+    "paridade": "none",
+    "bits_dados": 8,
+    "bits_parada": 1,
+    "unit_id": 1,
+    "timeout_ms": 1000
+  },
+  "tags": [
+    {
+      "nome": "causa_disparo",
+      "rotulo": "Causa do último disparo",
+      "unidade": "",
+      "endereco": 30,
+      "tipo": "uint16",
+      "decimais": 0,
+      "enum": {
+        "0": "sem disparo registrado",
+        "1": "sobrecorrente",
+        "2": "sobretensão",
+        "3": "subtensão",
+        "4": "curto-circuito",
+        "5": "falta à terra",
+        "6": "desequilíbrio de fases",
+        "7": "sobrecarga térmica",
+        "8": "abertura manual",
+        "9": "causa não identificada"
+      },
+      "_uso": "O CLP grava no instante do disparo (borda de X1), a partir das entradas X4-X7 vindas do 7SR5, e zera quando o disjuntor fecha. Informação para a tela; a trava é o permissivo X3."
+    },
+    { "nome": "trip_sobrecorrente", "rotulo": "7SR5: trip por sobrecorrente (50/51)", "endereco": 4, "funcao": "discreta", "tipo": "bool", "oculto": true, "_clp": "X4" },
+    { "nome": "trip_terra", "rotulo": "7SR5: trip por falta à terra (50N/51N)", "endereco": 5, "funcao": "discreta", "tipo": "bool", "oculto": true, "_clp": "X5" },
+    { "nome": "trip_sobretensao", "rotulo": "7SR5: trip por sobretensão (59)", "endereco": 6, "funcao": "discreta", "tipo": "bool", "oculto": true, "_clp": "X6" },
+    { "nome": "trip_subtensao", "rotulo": "7SR5: trip por subtensão (27)", "endereco": 7, "funcao": "discreta", "tipo": "bool", "oculto": true, "_clp": "X7" },
+    { "nome": "bobina_fechamento", "rotulo": "Saída para a bobina de fechamento", "endereco": 0, "funcao": "coil", "tipo": "bool", "oculto": true, "_clp": "Y0" },
+    { "nome": "bobina_abertura", "rotulo": "Saída para a bobina de abertura", "endereco": 1, "funcao": "coil", "tipo": "bool", "oculto": true, "_clp": "Y1" },
+    { "nome": "supervisorio_ausente", "rotulo": "CLP sem heartbeat do supervisório", "endereco": 106, "tipo": "uint16", "decimais": 0, "oculto": true, "_clp": "D106" }
+  ],
+  "comandos": [
+    {
+      "nome": "ligar",
+      "rotulo": "Religar disjuntor",
+      "descricao": "Religamento remoto. Só sai quando a proteção libera e a causa do disparo admite. O CLP confere de novo REMOTO e o permissivo antes de pulsar a bobina.",
+      "papel": "tecnico",
+      "exige_senha": true,
+      "funcao": "holding",
+      "endereco": 102,
+      "valor": 1,
+      "complemento": true,
+      "mostrar_causa": "causa_disparo",
+      "intertravamentos": [
+        { "tag": "modo_remoto", "igual": 1, "senao": "CLP em LOCAL — o comando remoto está bloqueado na chave do painel" },
+        { "tag": "disjuntor_ligado", "igual": 0, "senao": "O disjuntor já está ligado" },
+        { "tag": "permite_religar", "igual": 1, "senao": "Proteção não libera religamento remoto — inspeção e rearme no painel" },
+        { "tag": "causa_disparo", "fora_de": [1, 4, 5, 6, 7, 9], "senao": "Disparo por {valor} exige inspeção antes de religar" }
+      ],
+      "confirma_com": { "tag": "disjuntor_ligado", "igual": 1, "prazo_s": 10 }
+    },
+    {
+      "nome": "desligar",
+      "rotulo": "Desligar disjuntor",
+      "descricao": "Abertura remota do disjuntor de média tensão.",
+      "papel": "tecnico",
+      "exige_senha": true,
+      "perigoso": true,
+      "funcao": "holding",
+      "endereco": 102,
+      "valor": 2,
+      "complemento": true,
+      "intertravamentos": [
+        { "tag": "modo_remoto", "igual": 1, "senao": "CLP em LOCAL — o comando remoto está bloqueado na chave do painel" },
+        { "tag": "disjuntor_ligado", "igual": 1, "senao": "O disjuntor já está desligado" }
+      ],
+      "confirma_com": { "tag": "disjuntor_ligado", "igual": 0, "prazo_s": 10 }
+    }
+  ]
+}

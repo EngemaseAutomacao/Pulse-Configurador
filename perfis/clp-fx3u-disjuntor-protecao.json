@@ -1,0 +1,319 @@
+{
+  "titulo": "CLP FX3U — disjuntor com religamento seletivo por tipo de falha",
+  "fabricante": "Mitsubishi",
+  "modelo": "FX3U",
+  "protocolo": "Modbus RTU",
+  "observacao": "Evolução do perfil clp-fx3u-disjuntor. Acrescenta as duas formas de decidir se o religamento remoto é permitido: o permissivo vindo de um contato do relé de proteção (X3) e o código da causa do disparo (D30). Use as duas juntas — ver _arquitetura.",
+  "_arquitetura": "O permissivo por contato (X3) é a trava REAL: é o relé, dispositivo de proteção certificado, quem decide. O código de causa (D30) é INFORMAÇÃO: serve para a tela explicar ao operador por que pode ou não religar, e para o histórico. Nunca use só o código: se o supervisório for a única barreira, um defeito de software, uma aba antiga ou um acesso por outro caminho ao CLP conseguem religar sobre falta.",
+  "equipamento": {
+    "grupo": "agua"
+  },
+  "conexao": {
+    "tipo": "rtu",
+    "porta_serial": "COM7",
+    "baud": 9600,
+    "paridade": "none",
+    "bits_dados": 8,
+    "bits_parada": 1,
+    "timeout_ms": 1000
+  },
+  "padrao": {
+    "funcao": "holding",
+    "tipo": "int16",
+    "gap_maximo": 4,
+    "max_registradores": 64
+  },
+  "tags": [
+    {
+      "nome": "nivel",
+      "rotulo": "Nível da caixa d'água",
+      "unidade": "%",
+      "endereco": 212,
+      "tipo": "uint16",
+      "escala": 0.029949087,
+      "offset": -22.641509,
+      "limitar": [
+        0,
+        100
+      ],
+      "decimais": 1
+    },
+    {
+      "nome": "nivel_bruto",
+      "rotulo": "Leitura bruta do sensor",
+      "unidade": "",
+      "endereco": 212,
+      "tipo": "uint16",
+      "decimais": 0
+    },
+    {
+      "nome": "disjuntor_ligado",
+      "rotulo": "Disjuntor ligado",
+      "endereco": 0,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "severidade": "info",
+      "_clp": "X0"
+    },
+    {
+      "nome": "disjuntor_falha",
+      "rotulo": "Proteção disparada",
+      "endereco": 1,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "severidade": "alta",
+      "_clp": "X1"
+    },
+    {
+      "nome": "modo_remoto",
+      "rotulo": "Comando em REMOTO",
+      "endereco": 2,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "severidade": "info",
+      "inverso": true,
+      "_clp": "X2"
+    },
+    {
+      "nome": "permite_religar",
+      "rotulo": "Religamento remoto permitido pela proteção",
+      "endereco": 3,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "severidade": "info",
+      "inverso": true,
+      "_clp": "X3",
+      "_uso": "Contato do relé de proteção. FECHADO = a falta que atuou admite religamento remoto (sobretensão, subtensão). ABERTO = exige inspeção e rearme local (sobrecorrente, curto, falta à terra). Esta é a trava que vale."
+    },
+    {
+      "nome": "causa_disparo",
+      "rotulo": "Causa do último disparo",
+      "unidade": "",
+      "endereco": 30,
+      "tipo": "uint16",
+      "decimais": 0,
+      "enum": {
+        "0": "sem disparo registrado",
+        "1": "sobrecorrente",
+        "2": "sobretensão",
+        "3": "subtensão",
+        "4": "curto-circuito",
+        "5": "falta à terra",
+        "6": "desequilíbrio de fases",
+        "7": "sobrecarga térmica",
+        "8": "abertura manual"
+      },
+      "_uso": "Código escrito pelo CLP a partir do relé. É informação para a tela e para o histórico, não a trava de segurança."
+    },
+    {
+      "nome": "entrada_x4",
+      "rotulo": "Entrada X4",
+      "endereco": 4,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "entrada_x5",
+      "rotulo": "Entrada X5",
+      "endereco": 5,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "entrada_x6",
+      "rotulo": "Entrada X6",
+      "endereco": 6,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "entrada_x7",
+      "rotulo": "Entrada X7",
+      "endereco": 7,
+      "funcao": "discreta",
+      "tipo": "bool",
+      "oculto": true
+    },
+    {
+      "nome": "saida_y0",
+      "rotulo": "Saída Y0",
+      "endereco": 0,
+      "funcao": "coil",
+      "tipo": "bool",
+      "severidade": "info"
+    },
+    {
+      "nome": "saida_y1",
+      "rotulo": "Saída Y1",
+      "endereco": 1,
+      "funcao": "coil",
+      "tipo": "bool",
+      "severidade": "info"
+    }
+  ],
+  "alarmes": [
+    {
+      "tag": "nivel",
+      "min": 20,
+      "prioridade": "media",
+      "mensagem": "{nome}: nível baixo",
+      "atraso_s": 30
+    },
+    {
+      "tag": "nivel",
+      "min": 10,
+      "prioridade": "alta",
+      "mensagem": "{nome}: nível crítico",
+      "atraso_s": 30
+    },
+    {
+      "tag": "nivel",
+      "max": 97,
+      "prioridade": "media",
+      "mensagem": "{nome}: nível alto — risco de transbordo",
+      "atraso_s": 30
+    },
+    {
+      "tag": "nivel_bruto",
+      "min": 706,
+      "prioridade": "alta",
+      "mensagem": "{nome}: sensor de nível abaixo da faixa — laço de 4-20 mA aberto",
+      "atraso_s": 10
+    },
+    {
+      "tag": "disjuntor_falha",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: proteção do disjuntor disparada"
+    },
+    {
+      "tag": "permite_religar",
+      "digital": true,
+      "inverso": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: religamento remoto bloqueado pela proteção — exige inspeção local"
+    },
+    {
+      "tag": "modo_remoto",
+      "digital": true,
+      "inverso": true,
+      "prioridade": "baixa",
+      "mensagem": "{nome}: disjuntor em LOCAL — comando remoto bloqueado",
+      "atraso_s": 120
+    },
+    {
+      "comunicacao": true,
+      "prioridade": "alta",
+      "mensagem": "Sem comunicação com {nome}",
+      "atraso_s": 15
+    }
+  ],
+  "caixa_agua": {
+    "_uso": "Esqueleto da seção 'caixa_agua' da loja: o que é do CLP fica aqui, o volume e a altura do reservatório entram pela tela de Engenharia.",
+    "tag_nivel": "nivel",
+    "tag_isa": "TQ-01",
+    "capacidade_litros": null,
+    "altura_util_m": null,
+    "formato": "cilindrica",
+    "marcas": [
+      {
+        "valor": 97,
+        "rotulo": "alto",
+        "prioridade": "media"
+      },
+      {
+        "valor": 20,
+        "rotulo": "baixo",
+        "prioridade": "media"
+      },
+      {
+        "valor": 10,
+        "rotulo": "crítico",
+        "prioridade": "alta"
+      }
+    ]
+  },
+  "heartbeat": {
+    "endereco": 101,
+    "intervalo_s": 5,
+    "maximo": 30000
+  },
+  "comandos": [
+    {
+      "nome": "ligar",
+      "rotulo": "Religar disjuntor",
+      "descricao": "Religamento remoto. Só sai quando a proteção libera e a causa do disparo admite.",
+      "papel": "tecnico",
+      "exige_senha": true,
+      "funcao": "holding",
+      "endereco": 100,
+      "valor": 1,
+      "mostrar_causa": "causa_disparo",
+      "intertravamentos": [
+        {
+          "tag": "modo_remoto",
+          "igual": 1,
+          "senao": "CLP em LOCAL — o comando remoto está bloqueado na chave do painel"
+        },
+        {
+          "tag": "disjuntor_ligado",
+          "igual": 0,
+          "senao": "O disjuntor já está ligado"
+        },
+        {
+          "tag": "permite_religar",
+          "igual": 1,
+          "senao": "Proteção não libera religamento remoto — inspeção e rearme no painel"
+        },
+        {
+          "tag": "causa_disparo",
+          "fora_de": [
+            1,
+            4,
+            5,
+            6,
+            7
+          ],
+          "senao": "Disparo por {valor} exige inspeção antes de religar"
+        }
+      ],
+      "confirma_com": {
+        "tag": "disjuntor_ligado",
+        "igual": 1,
+        "prazo_s": 10
+      }
+    },
+    {
+      "nome": "desligar",
+      "rotulo": "Desligar disjuntor",
+      "descricao": "Abertura remota do disjuntor.",
+      "papel": "tecnico",
+      "exige_senha": true,
+      "perigoso": true,
+      "funcao": "holding",
+      "endereco": 100,
+      "valor": 2,
+      "intertravamentos": [
+        {
+          "tag": "modo_remoto",
+          "igual": 1,
+          "senao": "CLP em LOCAL — o comando remoto está bloqueado na chave do painel"
+        },
+        {
+          "tag": "disjuntor_ligado",
+          "igual": 1,
+          "senao": "O disjuntor já está desligado"
+        }
+      ],
+      "confirma_com": {
+        "tag": "disjuntor_ligado",
+        "igual": 0,
+        "prazo_s": 10
+      }
+    }
+  ],
+  "_causas_religaveis": "A lista em fora_de bloqueia: 1 sobrecorrente, 4 curto-circuito, 5 falta à terra, 6 desequilíbrio, 7 sobrecarga térmica. Ficam liberadas: 0 sem disparo, 2 sobretensão, 3 subtensão, 8 abertura manual. Para inverter a lógica e listar o que PODE, troque fora_de por em."
+}

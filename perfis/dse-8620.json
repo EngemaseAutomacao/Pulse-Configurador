@@ -1,0 +1,98 @@
+{
+  "herda": "dse-gencomm",
+  "titulo": "Grupo gerador — Deep Sea DSE8620 MKII (paralelismo com a rede)",
+  "modelo": "DSE8620 MKII",
+  "observacao": "Mapa GenComm comum + alarmes da família 8xxx de sincronismo e paralelismo com a rede. Disjuntores lidos pelos LEDs virtuais 1-3 (configurar no controlador — ver DSE.md).",
+  "equipamento": {
+    "derivar_opcoes": {
+      "falhas_extra": {
+        "falha_disjuntor": ["dse_al_disjuntor_gerador", "dse_al_disjuntor_rede",
+          "dse_al_disj_gerador_nao_abriu", "dse_al_disj_rede_nao_abriu"],
+        "falha_temperatura": ["dse_al_temperatura_alta", "dse_al_temperatura_chave", "dse_al_temperatura_trip"],
+        "falha_sensor": ["dse_al_sensor_oleo", "dse_al_pickup_perdido", "dse_al_pickup_aberto", "dse_al_calibracao",
+          "dse_al_sensor_tensao", "dse_al_sensor_temperatura"],
+        "falha_sincronismo": ["dse_al_falha_sincronismo", "dse_al_fora_sincronismo", "dse_al_fora_sincronismo_rede"],
+        "falha_protecao_rede": ["dse_al_rocof", "dse_al_salto_vetorial", "dse_al_desacoplamento",
+          "dse_al_desac_subfreq_1", "dse_al_desac_sobrefreq_1", "dse_al_desac_subtensao_1", "dse_al_desac_sobretensao_1",
+          "dse_al_desac_subfreq_2", "dse_al_desac_sobrefreq_2", "dse_al_desac_subtensao_2", "dse_al_desac_sobretensao_2"],
+        "falha_potencia_reversa": ["dse_al_potencia_reversa"],
+        "falha_curto": ["dse_al_curto", "dse_al_fuga_terra"],
+        "falha_excitacao": ["dse_al_perda_excitacao"],
+        "falha_sequencia_fase": ["dse_al_sequencia_fase", "dse_al_sequencia_fase_rede"],
+        "exportacao_rede": ["dse_al_exportacao_rede"],
+        "protecoes_inibidas": ["dse_al_protecoes_desabilitadas", "dse_al_protecoes_bloqueadas"]
+      }
+    }
+  },
+  "tags": [
+    { "nome": "paralelo_rede", "rotulo": "Modo de paralelismo com a rede ativo", "endereco": 808, "tipo": "uint16", "decimais": 0,
+      "oculto": true, "_fonte": "página 3, reg 40" },
+
+    { "nome": "potencia_rede", "rotulo": "Potência da rede", "unidade": "kW", "endereco": 1560, "tipo": "int32", "escala": 0.001,
+      "decimais": 1, "_fonte": "página 6, reg 24-25 (W; negativo = exportando)" },
+
+    { "nome": "disjuntor_fechado", "rotulo": "Disjuntor do gerador fechado", "endereco": 48896, "tipo": "uint16", "decimais": 0,
+      "oculto": true, "_fonte": "página 191, LED virtual 1 — configurar como disjuntor do gerador fechado" },
+    { "nome": "disjuntor_rede_fechado", "rotulo": "Disjuntor da rede fechado", "endereco": 48897, "tipo": "uint16", "decimais": 0,
+      "oculto": true, "_fonte": "página 191, LED virtual 2 — configurar como disjuntor da rede fechado" },
+    { "nome": "gerador_disponivel", "rotulo": "Gerador disponível", "endereco": 48898, "tipo": "uint16", "decimais": 0,
+      "oculto": true, "_fonte": "página 191, LED virtual 3 — configurar como Generator Available" },
+
+    { "nome": "dse_al_fuga_terra", "rotulo": "DSE: fuga à terra", "endereco": 39433, "bit": 12, "bits": 4, "oculto": true },
+    { "nome": "dse_al_sequencia_fase", "rotulo": "DSE: sequência de fase do gerador", "endereco": 39433, "bit": 8, "bits": 4, "oculto": true },
+    { "nome": "dse_al_sensor_tensao", "rotulo": "DSE: falha na medição automática de tensão", "endereco": 39433, "bit": 4, "bits": 4, "oculto": true },
+    { "nome": "dse_al_protecoes_desabilitadas", "rotulo": "DSE: proteções desabilitadas", "endereco": 39435, "bit": 12, "bits": 4, "oculto": true },
+    { "nome": "dse_al_protecoes_bloqueadas", "rotulo": "DSE: proteções bloqueadas", "endereco": 39435, "bit": 8, "bits": 4, "oculto": true },
+    { "nome": "dse_al_disj_gerador_nao_abriu", "rotulo": "DSE: disjuntor do gerador não abriu", "endereco": 39435, "bit": 4, "bits": 4, "oculto": true },
+    { "nome": "dse_al_disj_rede_nao_abriu", "rotulo": "DSE: disjuntor da rede não abriu", "endereco": 39435, "bit": 0, "bits": 4, "oculto": true },
+    { "nome": "dse_al_potencia_reversa", "rotulo": "DSE: potência reversa no gerador", "endereco": 39436, "bit": 4, "bits": 4, "oculto": true },
+    { "nome": "dse_al_curto", "rotulo": "DSE: curto-circuito", "endereco": 39436, "bit": 0, "bits": 4, "oculto": true },
+    { "nome": "dse_al_falha_sincronismo", "rotulo": "DSE: falha de sincronismo", "endereco": 39437, "bit": 8, "bits": 4, "oculto": true },
+    { "nome": "dse_al_exportacao_rede", "rotulo": "DSE: potência reversa / exportação para a rede", "endereco": 39441, "bit": 12, "bits": 4, "oculto": true },
+    { "nome": "dse_al_fora_sincronismo", "rotulo": "DSE: fora de sincronismo", "endereco": 39441, "bit": 0, "bits": 4, "oculto": true },
+    { "nome": "dse_al_perda_excitacao", "rotulo": "DSE: perda de excitação", "endereco": 39442, "bit": 8, "bits": 4, "oculto": true },
+    { "nome": "dse_al_rocof", "rotulo": "DSE: ROCOF da rede", "endereco": 39442, "bit": 4, "bits": 4, "oculto": true },
+    { "nome": "dse_al_salto_vetorial", "rotulo": "DSE: salto vetorial da rede", "endereco": 39442, "bit": 0, "bits": 4, "oculto": true },
+    { "nome": "dse_al_desac_subfreq_1", "rotulo": "DSE: desacoplamento — subfrequência (estágio 1)", "endereco": 39443, "bit": 12, "bits": 4, "oculto": true },
+    { "nome": "dse_al_desac_sobrefreq_1", "rotulo": "DSE: desacoplamento — sobrefrequência (estágio 1)", "endereco": 39443, "bit": 8, "bits": 4, "oculto": true },
+    { "nome": "dse_al_desac_subtensao_1", "rotulo": "DSE: desacoplamento — subtensão (estágio 1)", "endereco": 39443, "bit": 4, "bits": 4, "oculto": true },
+    { "nome": "dse_al_desac_sobretensao_1", "rotulo": "DSE: desacoplamento — sobretensão (estágio 1)", "endereco": 39443, "bit": 0, "bits": 4, "oculto": true },
+    { "nome": "dse_al_desacoplamento", "rotulo": "DSE: desacoplamento da rede (combinado)", "endereco": 39444, "bit": 12, "bits": 4, "oculto": true },
+    { "nome": "dse_al_sequencia_fase_rede", "rotulo": "DSE: sequência de fase da rede", "endereco": 39444, "bit": 4, "bits": 4, "oculto": true },
+    { "nome": "dse_al_temperatura_trip", "rotulo": "DSE: alta temperatura (trip elétrico)", "endereco": 39445, "bit": 12, "bits": 4, "oculto": true },
+    { "nome": "dse_al_sensor_temperatura", "rotulo": "DSE: sensor de temperatura em aberto", "endereco": 39445, "bit": 8, "bits": 4, "oculto": true },
+    { "nome": "dse_al_fora_sincronismo_rede", "rotulo": "DSE: fora de sincronismo com a rede", "endereco": 39445, "bit": 0, "bits": 4, "oculto": true },
+    { "nome": "dse_al_desac_subfreq_2", "rotulo": "DSE: desacoplamento — subfrequência (estágio 2)", "endereco": 39462, "bit": 12, "bits": 4, "oculto": true },
+    { "nome": "dse_al_desac_sobrefreq_2", "rotulo": "DSE: desacoplamento — sobrefrequência (estágio 2)", "endereco": 39462, "bit": 8, "bits": 4, "oculto": true },
+    { "nome": "dse_al_desac_subtensao_2", "rotulo": "DSE: desacoplamento — subtensão (estágio 2)", "endereco": 39462, "bit": 4, "bits": 4, "oculto": true },
+    { "nome": "dse_al_desac_sobretensao_2", "rotulo": "DSE: desacoplamento — sobretensão (estágio 2)", "endereco": 39462, "bit": 0, "bits": 4, "oculto": true },
+
+    { "nome": "falha_sincronismo", "rotulo": "Falha de sincronismo", "calculada": true, "tipo": "bool" },
+    { "nome": "falha_protecao_rede", "rotulo": "Proteção de rede (desacoplamento)", "calculada": true, "tipo": "bool" },
+    { "nome": "falha_potencia_reversa", "rotulo": "Potência reversa", "calculada": true, "tipo": "bool" },
+    { "nome": "falha_curto", "rotulo": "Curto-circuito / fuga à terra", "calculada": true, "tipo": "bool" },
+    { "nome": "falha_excitacao", "rotulo": "Perda de excitação", "calculada": true, "tipo": "bool" },
+    { "nome": "falha_sequencia_fase", "rotulo": "Sequência de fase", "calculada": true, "tipo": "bool" },
+    { "nome": "exportacao_rede", "rotulo": "Exportando para a rede", "calculada": true, "tipo": "bool", "oculto": true },
+    { "nome": "protecoes_inibidas", "rotulo": "Proteções desabilitadas ou bloqueadas", "calculada": true, "tipo": "bool", "oculto": true }
+  ],
+  "alarmes": [
+    { "tag": "falha_sincronismo", "digital": true, "prioridade": "alta", "mensagem": "{nome}: falha de sincronismo" },
+    { "tag": "falha_protecao_rede", "digital": true, "prioridade": "alta", "mensagem": "{nome}: proteção de rede atuou (ROCOF, salto vetorial ou desacoplamento)" },
+    { "tag": "falha_potencia_reversa", "digital": true, "prioridade": "alta", "mensagem": "{nome}: potência reversa no gerador" },
+    { "tag": "falha_curto", "digital": true, "prioridade": "alta", "mensagem": "{nome}: curto-circuito ou fuga à terra" },
+    { "tag": "falha_excitacao", "digital": true, "prioridade": "alta", "mensagem": "{nome}: perda de excitação" },
+    { "tag": "falha_sequencia_fase", "digital": true, "prioridade": "alta", "mensagem": "{nome}: sequência de fase incorreta" },
+    { "tag": "exportacao_rede", "digital": true, "prioridade": "media", "mensagem": "{nome}: exportando energia para a rede" },
+    { "tag": "protecoes_inibidas", "digital": true, "prioridade": "alta", "mensagem": "{nome}: proteções desabilitadas ou bloqueadas no controlador" }
+  ],
+  "gerador": {
+    "falhas": [
+      "falha_emergencia", "falha_pressao_oleo", "falha_temperatura", "falha_sobrevelocidade", "falha_subvelocidade",
+      "falha_frequencia", "falha_tensao", "falha_bateria", "falha_carregador", "falha_partida", "falha_parada",
+      "falha_disjuntor", "falha_sobrecorrente", "falha_sobrecarga", "falha_combustivel", "falha_sensor", "falha_ecu",
+      "falha_sincronismo", "falha_protecao_rede", "falha_potencia_reversa", "falha_curto", "falha_excitacao",
+      "falha_sequencia_fase"
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Central de Operação</title>
+<link rel="icon" type="image/png" href="/icone.png">
+<style>
+  :root {
+    --fundo: #eef0ec; --papel: #fbfbfa; --grafite: #23282a; --tinta: #1a1f1c; --apagado: #5b625c; --linha: #c9cdc6; --destaque: #d99000;
+    --titulo: "Archivo", "Segoe UI", system-ui, sans-serif;
+    --corpo: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fundo); color: var(--tinta); font: 16px/1.6 var(--corpo); }
+  header { background: var(--grafite); color: #f2f3f0; padding: 14px 16px; }
+  header .faixa { max-width: 820px; margin: 0 auto; }
+  header b { font: 700 17px var(--titulo); letter-spacing: .06em; text-transform: uppercase; }
+  main { max-width: 820px; margin: 24px auto 48px; padding: 28px 24px; background: var(--papel); border: 1px solid var(--linha); }
+  h1 { font: 700 28px/1.2 var(--titulo); margin: 0 0 12px; }
+  h2 { font: 700 18px var(--titulo); margin: 28px 0 8px; }
+  .entrar { display: inline-block; margin: 8px 0 4px; padding: 10px 20px; background: var(--grafite); color: #fff;
+            text-decoration: none; font-weight: 600; border-bottom: 3px solid var(--destaque); }
+  .entrar:hover { background: #3a4143; }
+  .nota { color: var(--apagado); font-size: 14px; }
+  ul { padding-left: 20px; }
+  footer { max-width: 820px; margin: 0 auto 32px; padding: 0 16px; color: var(--apagado); font-size: 14px; }
+  @media (max-width: 600px) { main { margin: 0; border: 0; padding: 20px 16px; } }
+</style>
+</head>
+<body>
+<header><div class="faixa"><b>Central de Operação</b></div></header>
+<main>
+  <h1>Supervisão das utilidades das lojas do Grupo Superviza</h1>
+  <p>A Central de Operação reúne, numa tela só, a situação de energia elétrica, água e grupo gerador de cada
+    loja: medições, alarmes e comunicação com os equipamentos. A partir dela, a equipe de operação acompanha
+    todas as lojas ao mesmo tempo e abre o Pulse Configurador de cada uma.</p>
+  <p><a class="entrar" href="/">Entrar com Google</a></p>
+  <p class="nota">Acesso restrito à equipe autorizada. Só entram os e-mails cadastrados pelos administradores do sistema.</p>
+
+  <h2>O que o sistema faz</h2>
+  <ul>
+    <li>Mostra quais lojas estão em comunicação e quais equipamentos não respondem.</li>
+    <li>Junta os alarmes de todas as lojas numa lista única, com aviso sonoro para os mais graves.</li>
+    <li>Dá acesso ao Pulse Configurador de cada loja: medições ao vivo, histórico, consumo de energia e comandos, com
+      usuário e senha próprios da loja.</li>
+  </ul>
+
+  <h2>Login e privacidade</h2>
+  <p>O login é feito com a conta Google da pessoa autorizada. O sistema usa apenas o endereço de e-mail, para
+    conferir se ele está na lista de acessos. Veja a <a href="/privacidade">Política de Privacidade</a>.</p>
+</main>
+<footer>Desenvolvido e mantido pela Engemase Engenharia · <a href="/privacidade">Política de Privacidade</a></footer>
+</body>
+</html>

@@ -1,0 +1,429 @@
+{
+  "_leia": "Planta conforme projeto elétrico, COM3 em 19200 8N1 = RS-485 da subestação (7CLP1, que também traz o gerador DSE8620 pela RS-232 dele); COM4 = RS-485 dos medidores e do 15CLP1 (reservatório), em 9600 8N1 como os medidores já estão. Ver PLANTA.md.",
+  "planta": "Viza CD — E01",
+  "porta_http": 8080,
+  "endereco_http": "0.0.0.0",
+  "intervalo_leitura_ms": 1000,
+  "varreduras_por_leitura_lenta": 20,
+  "seguranca": {
+    "sessao_horas": 12,
+    "tentativas_ate_bloquear": 5,
+    "bloqueio_minutos": 15,
+    "escrita_modbus_liberada": false,
+    "_nota": "O heartbeat declarado no perfil continua sendo escrito mesmo com esta chave desligada — ela trava apenas a escrita manual pelo terminal de engenharia.",
+    "comandos_liberados": true,
+    "_comandos": "Libera os botões de acionamento declarados nos perfis (ex.: ligar/desligar disjuntor). Cada comando ainda passa pelos intertravamentos do perfil, exige o papel declarado e fica registrado na auditoria. Deixe FALSE em instalação só de monitoramento."
+  },
+  "historico": {
+    "intervalo_gravacao_s": 15,
+    "_retencao": "Sem prazo fixo: o histórico enche o disco até sobrarem espaco_minimo_mb (padrão 1024) e daí apaga o dia mais antigo. retencao_dias, se posto aqui, vira um teto.",
+    "arquivo": "dados/planta.db"
+  },
+  "medidores": [
+    {
+      "id": "geral",
+      "perfil": "7kt0310-entrada",
+      "tag_isa": "7E1",
+      "nome": "Entrada geral",
+      "principal": true,
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM4",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 1,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 630
+        }
+      }
+    },
+    {
+      "id": "padaria",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "8E1",
+      "nome": "Padaria",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM4",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 2,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 250
+        }
+      },
+      "varredura_a_cada": 2
+    },
+    {
+      "id": "acougue",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "8E2",
+      "nome": "Açougue",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM4",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 3,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 100
+        }
+      },
+      "varredura_a_cada": 2
+    },
+    {
+      "id": "frios",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "9E1",
+      "nome": "Ilhas de frios",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM4",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 4,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 125
+        }
+      },
+      "varredura_a_cada": 2
+    },
+    {
+      "id": "refrigerados",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "9E2",
+      "nome": "Refrigerados",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM4",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 5,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 160
+        }
+      },
+      "varredura_a_cada": 2
+    },
+    {
+      "id": "congelados",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "10E1",
+      "nome": "Congelados",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM4",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 6,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 200
+        }
+      },
+      "varredura_a_cada": 2
+    },
+    {
+      "id": "climatizacao",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "10E2",
+      "nome": "Climatização",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM4",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 7,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 250
+        }
+      },
+      "varredura_a_cada": 2
+    },
+    {
+      "id": "iluminacao",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "11E1",
+      "nome": "Iluminação",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM4",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 8,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 125
+        }
+      },
+      "varredura_a_cada": 2
+    },
+    {
+      "id": "carregadores",
+      "perfil": "7kt0310-alimentador",
+      "tag_isa": "11E1",
+      "nome": "Carregadores",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM4",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 9,
+        "timeout_ms": 1000
+      },
+      "limites": {
+        "corrente_a": {
+          "max": 100
+        }
+      },
+      "varredura_a_cada": 2
+    },
+    {
+      "id": "subestacao",
+      "nome": "Subestação — disjuntor de MT",
+      "tag_isa": "7CLP1",
+      "perfil": "clp-subestacao",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM3",
+        "baud": 19200,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 1,
+        "timeout_ms": 1000
+      }
+    },
+    {
+      "id": "gmg",
+      "nome": "Grupo gerador DSE8620",
+      "tag_isa": "GMG-01",
+      "perfil": "dse-8620-via-clp",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM3",
+        "baud": 19200,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 1,
+        "timeout_ms": 1000
+      }
+    },
+    {
+      "id": "reservatorio",
+      "nome": "Reservatório",
+      "tag_isa": "15CLP1",
+      "perfil": "clp-reservatorio",
+      "conexao": {
+        "tipo": "rtu",
+        "interface": "rs485",
+        "porta_serial": "COM4",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 10,
+        "timeout_ms": 1000
+      }
+    }
+  ],
+  "unifilar": {
+    "entrada": {
+      "rotulo": "Concessionária · entrada geral",
+      "medidor": "geral"
+    },
+    "barramento": {
+      "rotulo": "Barra QGBT · 380/220 V"
+    },
+    "gerador": {
+      "medidor": "gmg",
+      "rotulo": "Grupo gerador · 380 V"
+    },
+    "saidas": [
+      {
+        "medidor": "padaria",
+        "rotulo": "Padaria",
+        "disjuntor": "250 A",
+        "tag_isa": "QD-02"
+      },
+      {
+        "medidor": "acougue",
+        "rotulo": "Açougue",
+        "disjuntor": "100 A",
+        "tag_isa": "QD-03"
+      },
+      {
+        "medidor": "frios",
+        "rotulo": "Ilhas de frios",
+        "disjuntor": "125 A",
+        "tag_isa": "QD-04"
+      },
+      {
+        "medidor": "refrigerados",
+        "rotulo": "Refrigerados",
+        "disjuntor": "160 A",
+        "tag_isa": "QD-05"
+      },
+      {
+        "medidor": "congelados",
+        "rotulo": "Congelados",
+        "disjuntor": "200 A",
+        "tag_isa": "QD-06"
+      },
+      {
+        "medidor": "climatizacao",
+        "rotulo": "Climatização",
+        "disjuntor": "250 A",
+        "tag_isa": "QD-07"
+      },
+      {
+        "medidor": "iluminacao",
+        "rotulo": "Iluminação",
+        "disjuntor": "125 A",
+        "tag_isa": "QD-08"
+      },
+      {
+        "medidor": "carregadores",
+        "rotulo": "Carregadores",
+        "disjuntor": "100 A",
+        "tag_isa": "QD-09"
+      }
+    ]
+  },
+  "caixa_agua": {
+    "medidor": "reservatorio",
+    "capacidade_litros": 10000,
+    "altura_util_m": 2,
+    "formato": "cilindrica"
+  },
+  "gerador": {
+    "medidor": "gmg",
+    "_preencher": "potência nominal, capacidade do tanque e consumo em plena carga do grupo instalado — pela tela de Engenharia",
+    "potencia_nominal_kw": null,
+    "capacidade_tanque_litros": null,
+    "consumo_litros_hora": null
+  },
+  "alarmes": [
+    {
+      "tag": "geral.corrente_a",
+      "max": 630,
+      "prioridade": "alta",
+      "mensagem": "Entrada: sobrecarga na fase 1",
+      "atraso_s": 10
+    },
+    {
+      "tag": "geral.corrente_b",
+      "max": 630,
+      "prioridade": "alta",
+      "mensagem": "Entrada: sobrecarga na fase 2",
+      "atraso_s": 10
+    },
+    {
+      "tag": "geral.corrente_c",
+      "max": 630,
+      "prioridade": "alta",
+      "mensagem": "Entrada: sobrecarga na fase 3",
+      "atraso_s": 10
+    },
+    {
+      "tag": "geral.corrente_n",
+      "max": 190,
+      "prioridade": "media",
+      "mensagem": "Corrente de neutro elevada",
+      "atraso_s": 30
+    },
+    {
+      "tag": "geral.demanda",
+      "max": 320,
+      "prioridade": "media",
+      "mensagem": "Demanda acima do contratado"
+    },
+    {
+      "tag": "geral.thd_tensao",
+      "max": 8,
+      "prioridade": "baixa",
+      "mensagem": "THD de tensão acima do limite",
+      "atraso_s": 60
+    },
+    {
+      "tag": "geral.thd_corrente",
+      "max": 15,
+      "prioridade": "baixa",
+      "mensagem": "THD de corrente acima do limite",
+      "atraso_s": 60
+    },
+    {
+      "tag": "frios.potencia_ativa",
+      "min": 1,
+      "prioridade": "alta",
+      "mensagem": "{nome} sem consumo — possível desarme",
+      "atraso_s": 60
+    },
+    {
+      "tag": "refrigerados.potencia_ativa",
+      "min": 1,
+      "prioridade": "alta",
+      "mensagem": "{nome} sem consumo — possível desarme",
+      "atraso_s": 60
+    },
+    {
+      "tag": "congelados.potencia_ativa",
+      "min": 1,
+      "prioridade": "alta",
+      "mensagem": "{nome} sem consumo — possível desarme",
+      "atraso_s": 60
+    }
+  ]
+}

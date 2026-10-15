@@ -1,0 +1,70 @@
+{
+  "_leia": "Bancada com um CLP Mitsubishi FX3U, convertida do flow Node-RED. Suba com: npm run bancada (Windows) ou node server.js --config config.fx3u.json. Confira a porta COM antes: Gerenciador de Dispositivos > Portas (COM e LPT).",
+  "planta": "Teste de alarme",
+  "porta_http": 8080,
+  "endereco_http": "0.0.0.0",
+  "intervalo_leitura_ms": 1000,
+  "varreduras_por_leitura_lenta": 20,
+  "seguranca": {
+    "sessao_horas": 12,
+    "tentativas_ate_bloquear": 5,
+    "bloqueio_minutos": 15,
+    "escrita_modbus_liberada": false,
+    "_nota": "O heartbeat declarado no perfil continua sendo escrito mesmo com esta chave desligada — ela trava apenas a escrita manual pelo terminal de engenharia."
+  },
+  "historico": {
+    "intervalo_gravacao_s": 15,
+    "retencao_dias": 90,
+    "arquivo": "dados/teste-alarme.db"
+  },
+  "medidores": [
+    {
+      "id": "clp",
+      "perfil": "clp-fx3u-disjuntor",
+      "tag_isa": "CLP-01",
+      "nome": "CLP FX3U",
+      "conexao": {
+        "porta_serial": "COM7",
+        "baud": 9600,
+        "paridade": "none",
+        "bits_dados": 8,
+        "bits_parada": 1,
+        "unit_id": 1,
+        "timeout_ms": 1000
+      }
+    }
+  ],
+  "caixa_agua": {
+    "medidor": "clp",
+    "tag_nivel": "nivel",
+    "tag_isa": "TQ-01",
+    "capacidade_litros": 10000,
+    "altura_util_m": 2.0,
+    "formato": "cilindrica",
+    "marcas": [
+      {
+        "valor": 97,
+        "rotulo": "alto",
+        "prioridade": "media"
+      },
+      {
+        "valor": 20,
+        "rotulo": "baixo",
+        "prioridade": "media"
+      },
+      {
+        "valor": 10,
+        "rotulo": "crítico",
+        "prioridade": "alta"
+      }
+    ]
+  },
+  "alarmes": [
+    {
+      "tag": "clp.nivel",
+      "min": 99,
+      "prioridade": "alta",
+      "mensagem": "Alarme de teste — nível abaixo de 99%"
+    }
+  ]
+}

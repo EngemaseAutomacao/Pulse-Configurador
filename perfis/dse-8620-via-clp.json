@@ -1,0 +1,43 @@
+{
+  "herda": "dse-8620",
+  "titulo": "Grupo gerador DSE8620 — lido pelo 7CLP1 (CLP lê o DSE na RS-232 e espelha em D1000…)",
+  "protocolo": "Modbus RTU (RS-485) no 7CLP1; o CLP é mestre do DSE na RS-232",
+  "observacao": "Mesmo mapa e mesma tradução do dse-8620; só os endereços mudam. O CLP copia cada bloco GenComm para a área D indicada em remapear. Ver PLC_7CLP1.md.",
+  "remapear": [
+    { "de": 772,   "ate": 774,   "para": 1000, "_dse": "página 3 — modo e status" },
+    { "de": 808,   "ate": 808,   "para": 1003, "_dse": "página 3 — paralelismo" },
+    { "de": 1024,  "ate": 1071,  "para": 1010, "_dse": "página 4 — instrumentos" },
+    { "de": 1536,  "ate": 1561,  "para": 1060, "_dse": "página 6 — kW, kVA, FP, rede" },
+    { "de": 1798,  "ate": 1809,  "para": 1090, "_dse": "página 7 — horímetro, kWh, partidas" },
+    { "de": 1826,  "ate": 1827,  "para": 1102, "_dse": "página 7 — diesel consumido" },
+    { "de": 39425, "ate": 39445, "para": 1110, "_dse": "página 154 — alarmes 1 a 21" },
+    { "de": 39462, "ate": 39462, "para": 1131, "_dse": "página 154 — alarme 38" },
+    { "de": 48896, "ate": 48898, "para": 1132, "_dse": "página 191 — LEDs virtuais 1-3" },
+    { "de": 4104,  "ate": 4105,  "para": 1150, "_dse": "página 16 — chave de controle + complemento" }
+  ],
+  "equipamento": {
+    "escravo_compartilhado": true,
+    "online_quando": {
+      "tag": "link_dse",
+      "igual": 1,
+      "mensagem": "7CLP1 sem comunicação com o DSE8620 (RS-232)"
+    }
+  },
+  "conexao": {
+    "tipo": "rtu",
+    "interface": "rs485",
+    "porta_serial": "COM3",
+    "baud": 19200,
+    "paridade": "none",
+    "bits_dados": 8,
+    "bits_parada": 1,
+    "unit_id": 1,
+    "timeout_ms": 1000
+  },
+  "tags": [
+    { "nome": "link_dse", "rotulo": "Enlace 7CLP1 ↔ DSE8620", "endereco": 1140, "sentinelas": false, "decimais": 0, "oculto": true,
+      "_clp": "D1140 — 1 = o CLP completou uma leitura do DSE nos últimos 5 s" },
+    { "nome": "ciclos_dse", "rotulo": "Leituras completas do DSE (contador)", "endereco": 1141, "sentinelas": false, "decimais": 0, "oculto": true },
+    { "nome": "erros_dse", "rotulo": "Falhas de leitura do DSE (contador)", "endereco": 1142, "sentinelas": false, "decimais": 0, "oculto": true }
+  ]
+}

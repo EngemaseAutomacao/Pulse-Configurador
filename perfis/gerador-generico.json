@@ -1,0 +1,384 @@
+{
+  "titulo": "Grupo gerador — mapa genérico",
+  "fabricante": "genérico",
+  "protocolo": "Modbus RTU",
+  "equipamento": {
+    "grupo": "gerador",
+    "varredura_a_cada": 2
+  },
+  "conexao": {
+    "tipo": "rtu",
+    "porta_serial": "/dev/ttyUSB0",
+    "baud": 9600,
+    "paridade": "none",
+    "bits_dados": 8,
+    "bits_parada": 1,
+    "timeout_ms": 800
+  },
+  "padrao": {
+    "funcao": "holding",
+    "tipo": "int16",
+    "gap_maximo": 4,
+    "max_registradores": 64
+  },
+  "tags": [
+    {
+      "nome": "tensao_ab",
+      "rotulo": "Tensão V1-2",
+      "unidade": "V",
+      "endereco": 0,
+      "decimais": 0,
+      "fase": "a"
+    },
+    {
+      "nome": "tensao_bc",
+      "rotulo": "Tensão V2-3",
+      "unidade": "V",
+      "endereco": 1,
+      "decimais": 0,
+      "fase": "b"
+    },
+    {
+      "nome": "tensao_ca",
+      "rotulo": "Tensão V3-1",
+      "unidade": "V",
+      "endereco": 2,
+      "decimais": 0,
+      "fase": "c"
+    },
+    {
+      "nome": "corrente_a",
+      "rotulo": "Corrente I1",
+      "unidade": "A",
+      "endereco": 3,
+      "decimais": 0,
+      "fase": "a"
+    },
+    {
+      "nome": "corrente_b",
+      "rotulo": "Corrente I2",
+      "unidade": "A",
+      "endereco": 4,
+      "decimais": 0,
+      "fase": "b"
+    },
+    {
+      "nome": "corrente_c",
+      "rotulo": "Corrente I3",
+      "unidade": "A",
+      "endereco": 5,
+      "decimais": 0,
+      "fase": "c"
+    },
+    {
+      "nome": "frequencia",
+      "rotulo": "Frequência",
+      "unidade": "Hz",
+      "endereco": 6,
+      "escala": 0.1,
+      "decimais": 1
+    },
+    {
+      "nome": "potencia",
+      "rotulo": "Potência fornecida",
+      "unidade": "kW",
+      "endereco": 7,
+      "escala": 0.1,
+      "decimais": 1
+    },
+    {
+      "nome": "rotacao",
+      "rotulo": "Rotação",
+      "unidade": "rpm",
+      "endereco": 8,
+      "decimais": 0
+    },
+    {
+      "nome": "tensao_bateria",
+      "rotulo": "Tensão da bateria",
+      "unidade": "V",
+      "endereco": 9,
+      "escala": 0.1,
+      "decimais": 1
+    },
+    {
+      "nome": "pressao_oleo",
+      "rotulo": "Pressão do óleo",
+      "unidade": "bar",
+      "endereco": 10,
+      "escala": 0.1,
+      "decimais": 1
+    },
+    {
+      "nome": "temperatura",
+      "rotulo": "Temperatura da água",
+      "unidade": "°C",
+      "endereco": 11,
+      "decimais": 0
+    },
+    {
+      "nome": "nivel_diesel",
+      "rotulo": "Nível de diesel",
+      "unidade": "%",
+      "endereco": 12,
+      "escala": 0.1,
+      "decimais": 1
+    },
+    {
+      "nome": "horimetro",
+      "rotulo": "Horímetro",
+      "unidade": "h",
+      "endereco": 14,
+      "tipo": "uint32",
+      "decimais": 0,
+      "lento": true
+    },
+    {
+      "nome": "estado",
+      "rotulo": "Estado do grupo",
+      "unidade": "",
+      "endereco": 20,
+      "tipo": "uint16",
+      "decimais": 0,
+      "oculto": true
+    },
+    {
+      "nome": "modo",
+      "rotulo": "Modo de operação",
+      "unidade": "",
+      "endereco": 21,
+      "tipo": "uint16",
+      "decimais": 0,
+      "oculto": true
+    },
+    {
+      "nome": "disjuntor_fechado",
+      "rotulo": "Disjuntor do gerador fechado",
+      "endereco": 22,
+      "bit": 0,
+      "tipo": "bool"
+    },
+    {
+      "nome": "rede_presente",
+      "rotulo": "Rede da concessionária presente",
+      "endereco": 22,
+      "bit": 1,
+      "tipo": "bool"
+    },
+    {
+      "nome": "falha_partida",
+      "rotulo": "Falha de partida",
+      "endereco": 23,
+      "bit": 0,
+      "tipo": "bool"
+    },
+    {
+      "nome": "falha_sobrevelocidade",
+      "rotulo": "Sobrevelocidade",
+      "endereco": 23,
+      "bit": 1,
+      "tipo": "bool"
+    },
+    {
+      "nome": "falha_pressao_oleo",
+      "rotulo": "Baixa pressão de óleo",
+      "endereco": 23,
+      "bit": 2,
+      "tipo": "bool"
+    },
+    {
+      "nome": "falha_temperatura",
+      "rotulo": "Alta temperatura da água",
+      "endereco": 23,
+      "bit": 3,
+      "tipo": "bool"
+    },
+    {
+      "nome": "falha_bateria",
+      "rotulo": "Bateria fraca",
+      "endereco": 23,
+      "bit": 4,
+      "tipo": "bool"
+    },
+    {
+      "nome": "falha_combustivel",
+      "rotulo": "Nível crítico de combustível",
+      "endereco": 23,
+      "bit": 5,
+      "tipo": "bool"
+    },
+    {
+      "nome": "falha_emergencia",
+      "rotulo": "Parada de emergência acionada",
+      "endereco": 23,
+      "bit": 6,
+      "tipo": "bool"
+    },
+    {
+      "nome": "falha_carregador",
+      "rotulo": "Falha do carregador de bateria",
+      "endereco": 23,
+      "bit": 7,
+      "tipo": "bool"
+    },
+    {
+      "nome": "falha_sobrecarga",
+      "rotulo": "Sobrecarga do gerador",
+      "endereco": 23,
+      "bit": 8,
+      "tipo": "bool"
+    },
+    {
+      "nome": "falha_tensao",
+      "rotulo": "Tensão fora da faixa",
+      "endereco": 23,
+      "bit": 9,
+      "tipo": "bool"
+    }
+  ],
+  "alarmes": [
+    {
+      "tag": "falha_partida",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: falha de partida"
+    },
+    {
+      "tag": "falha_sobrevelocidade",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: sobrevelocidade"
+    },
+    {
+      "tag": "falha_pressao_oleo",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: baixa pressão de óleo"
+    },
+    {
+      "tag": "falha_temperatura",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: alta temperatura da água"
+    },
+    {
+      "tag": "falha_bateria",
+      "digital": true,
+      "prioridade": "media",
+      "mensagem": "{nome}: bateria fraca"
+    },
+    {
+      "tag": "falha_combustivel",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: nível crítico de combustível"
+    },
+    {
+      "tag": "falha_emergencia",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: parada de emergência acionada"
+    },
+    {
+      "tag": "falha_carregador",
+      "digital": true,
+      "prioridade": "media",
+      "mensagem": "{nome}: falha do carregador de bateria"
+    },
+    {
+      "tag": "falha_sobrecarga",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: sobrecarga do gerador"
+    },
+    {
+      "tag": "falha_tensao",
+      "digital": true,
+      "prioridade": "alta",
+      "mensagem": "{nome}: tensão fora da faixa"
+    },
+    {
+      "tag": "nivel_diesel",
+      "min": 50,
+      "prioridade": "media",
+      "mensagem": "{nome}: diesel abaixo da reserva",
+      "atraso_s": 60
+    },
+    {
+      "tag": "nivel_diesel",
+      "min": 25,
+      "prioridade": "alta",
+      "mensagem": "{nome}: diesel em nível crítico",
+      "atraso_s": 60
+    },
+    {
+      "tag": "tensao_bateria",
+      "min": 23.0,
+      "prioridade": "media",
+      "mensagem": "{nome}: tensão da bateria baixa",
+      "atraso_s": 120
+    },
+    {
+      "tag": "estado",
+      "max": 4.5,
+      "prioridade": "alta",
+      "mensagem": "{nome} em falha"
+    },
+    {
+      "comunicacao": true,
+      "prioridade": "alta",
+      "mensagem": "Sem comunicação com {nome}",
+      "atraso_s": 15
+    }
+  ],
+  "gerador": {
+    "_uso": "Esqueleto da seção 'gerador' da loja. O que é do modelo (estados, modos, falhas, qual tag é o nível) fica aqui; o que é da instalação (tanque, consumo, potência) é preenchido pela tela de Engenharia e vence estes valores.",
+    "tag_nivel": "nivel_diesel",
+    "potencia_nominal_kw": null,
+    "capacidade_tanque_litros": null,
+    "consumo_litros_hora": null,
+    "modo_automatico": 1,
+    "bateria_minima_v": 23,
+    "bateria_repouso_min_v": 25.5,
+    "bateria_partida_min_v": 20,
+    "bateria_partida_critica_v": 18,
+    "teste_a_cada_dias": 7,
+    "estados": [
+      "Parado",
+      "Pré-aquecendo",
+      "Partindo",
+      "Em carga",
+      "Resfriando",
+      "Em falha"
+    ],
+    "modos": [
+      "Manual",
+      "Automático",
+      "Teste"
+    ],
+    "falhas": [
+      "falha_partida",
+      "falha_sobrevelocidade",
+      "falha_pressao_oleo",
+      "falha_temperatura",
+      "falha_bateria",
+      "falha_combustivel",
+      "falha_emergencia",
+      "falha_carregador",
+      "falha_sobrecarga",
+      "falha_tensao"
+    ],
+    "marcas": [
+      {
+        "valor": 50,
+        "rotulo": "reserva",
+        "prioridade": "media"
+      },
+      {
+        "valor": 25,
+        "rotulo": "crítico",
+        "prioridade": "alta"
+      }
+    ]
+  }
+}

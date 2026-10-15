@@ -1,0 +1,39 @@
+[Unit]
+Description=Engemase Pulse Configurador (energia, agua e gerador via Modbus)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=supervisorio
+Group=supervisorio
+# acesso as portas seriais (/dev/ttyUSB*) sem rodar como root
+SupplementaryGroups=dialout
+WorkingDirectory=/opt/supervisorio
+# troque config.planta.json pela configuracao desta instalacao
+ExecStart=/usr/bin/node server.js --config config.planta.json
+# o consumo por hora e o historico seguem o relogio local: sem isto um servidor
+# em UTC poe o consumo das 14h na barra das 17h
+Environment=TZ=America/Sao_Paulo
+Environment=NODE_ENV=production
+Restart=always
+RestartSec=5
+# SIGTERM fecha o banco e as portas seriais antes de sair
+KillSignal=SIGTERM
+TimeoutStopSec=15
+StandardOutput=journal
+StandardError=journal
+
+# Endurecimento: o servico so escreve na propria pasta (configuracao salva pela
+# tela de Engenharia + dados/) e so enxerga as seriais
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/supervisorio
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

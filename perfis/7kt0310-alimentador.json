@@ -1,0 +1,177 @@
+{
+  "titulo": "Siemens SMART 7KT0310 — alimentador",
+  "fabricante": "Siemens",
+  "modelo": "7KT0310",
+  "protocolo": "Modbus RTU",
+  "observacao": "Leitura em 3xxxx (função 04), endereço da norma (30001 = 0), float32 com a PALAVRA BAIXA PRIMEIRO (CDAB), no máximo 12 registradores por leitura (acima disso responde com CRC errado). Lido como ABCD a partir do endereço+1 os valores parecem certos (a metade alta é a da grandeza certa), mas a metade baixa vem da grandeza seguinte: a energia anda em degraus de 1024 kWh.",
+  "equipamento": {
+    "grupo": "energia",
+    "varredura_a_cada": 4,
+    "derivar": "harmonicas"
+  },
+  "conexao": {
+    "tipo": "rtu",
+    "porta_serial": "/dev/ttyUSB0",
+    "baud": 9600,
+    "paridade": "none",
+    "bits_dados": 8,
+    "bits_parada": 1,
+    "timeout_ms": 1000,
+    "intervalo_entre_quadros_ms": 20
+  },
+  "padrao": {
+    "funcao": "input",
+    "tipo": "float32",
+    "ordem_palavras": "CDAB",
+    "gap_maximo": 60,
+    "max_registradores": 12,
+    "faixa_fisica": [
+      -10000000,
+      10000000
+    ]
+  },
+  "tags": [
+    {
+      "nome": "corrente_a",
+      "rotulo": "Corrente I1",
+      "unidade": "A",
+      "endereco": 16,
+      "decimais": 1,
+      "fase": "a",
+      "faixa_fisica": [
+        0,
+        10000
+      ]
+    },
+    {
+      "nome": "corrente_b",
+      "rotulo": "Corrente I2",
+      "unidade": "A",
+      "endereco": 18,
+      "decimais": 1,
+      "fase": "b",
+      "faixa_fisica": [
+        0,
+        10000
+      ]
+    },
+    {
+      "nome": "corrente_c",
+      "rotulo": "Corrente I3",
+      "unidade": "A",
+      "endereco": 20,
+      "decimais": 1,
+      "fase": "c",
+      "faixa_fisica": [
+        0,
+        10000
+      ]
+    },
+    {
+      "nome": "potencia_ativa",
+      "rotulo": "Potência ativa",
+      "unidade": "kW",
+      "endereco": 42,
+      "decimais": 2,
+      "faixa_fisica": [
+        -10000,
+        10000
+      ]
+    },
+    {
+      "nome": "energia_ativa",
+      "rotulo": "Energia ativa importada",
+      "unidade": "kWh",
+      "endereco": 96,
+      "decimais": 0,
+      "lento": true,
+      "acumulador": true,
+      "oculto": true,
+      "faixa_fisica": [
+        0,
+        1000000000
+      ]
+    },
+    {
+      "nome": "potencia_aparente",
+      "rotulo": "Potência aparente",
+      "unidade": "kVA",
+      "endereco": 44,
+      "decimais": 2,
+      "oculto": true,
+      "faixa_fisica": [
+        -10000,
+        10000
+      ]
+    },
+    {
+      "nome": "energia_aparente",
+      "rotulo": "Energia aparente",
+      "unidade": "kVAh",
+      "endereco": 60,
+      "_fonte": "Total_kVAh (varredura do medidor geral: 182.398 kVAh ao lado de 173.657 kWh)",
+      "decimais": 0,
+      "lento": true,
+      "acumulador": true,
+      "faixa_fisica": [
+        0,
+        1000000000
+      ],
+      "oculto": true
+    },
+    {
+      "nome": "thd_corrente",
+      "rotulo": "THD corrente I1",
+      "unidade": "%",
+      "endereco": 136,
+      "decimais": 1,
+      "lento": true,
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "thd_corrente_b",
+      "rotulo": "THD corrente I2",
+      "unidade": "%",
+      "endereco": 138,
+      "decimais": 1,
+      "lento": true,
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    {
+      "nome": "thd_corrente_c",
+      "rotulo": "THD corrente I3",
+      "unidade": "%",
+      "endereco": 140,
+      "decimais": 1,
+      "lento": true,
+      "faixa_fisica": [
+        0,
+        1000
+      ]
+    },
+    { "nome": "corrente_harmonica_a", "rotulo": "Corrente harmônica I1", "unidade": "A", "calculada": true, "decimais": 1, "fase": "a" },
+    { "nome": "corrente_harmonica_b", "rotulo": "Corrente harmônica I2", "unidade": "A", "calculada": true, "decimais": 1, "fase": "b" },
+    { "nome": "corrente_harmonica_c", "rotulo": "Corrente harmônica I3", "unidade": "A", "calculada": true, "decimais": 1, "fase": "c" },
+    { "nome": "corrente_harmonica", "rotulo": "Corrente harmônica (maior fase)", "unidade": "A", "calculada": true, "decimais": 1 }
+  ],
+  "alarmes": [
+    {
+      "tag": "corrente_a",
+      "prioridade": "media",
+      "mensagem": "{nome}: corrente acima do disjuntor",
+      "atraso_s": 10
+    },
+    {
+      "comunicacao": true,
+      "prioridade": "media",
+      "mensagem": "Sem comunicação com {nome}",
+      "atraso_s": 30
+    }
+  ]
+}

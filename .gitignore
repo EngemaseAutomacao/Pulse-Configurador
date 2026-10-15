@@ -1,0 +1,4 @@
+# Dados de execução: bancos SQLite (com usuários, senhas e sessões), versões
+# da configuração e certificados. Cada servidor tem os seus; não vão para o Git.
+dados/
+node_modules/
