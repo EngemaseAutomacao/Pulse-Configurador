@@ -1,0 +1,13 @@
+Logos mostrados no painel, na tela de login e no demo.
+
+  engemase.svg (ou .png / .webp)  - desenvolvedora: rodapé da coluna e do login
+  cliente.svg  (ou .png / .webp)  - cliente da instalação: cabeçalho e topo do login
+
+  icone.png                       - ícone da aba do navegador (64x64, símbolo da Engemase);
+                                    a central usa uma cópia em central/publico/icone.png
+
+Prefira SVG; em PNG, fundo transparente e pelo menos 150 px de altura.
+O logo do cliente é de cada instalação: troque o arquivo cliente.* na pasta
+/opt/supervisorio/public/assets/marcas/ do mini PC da loja.
+Arquivo ausente = o espaço não aparece (nada quebra).
+Depois de trocar, rode "node tools/gerar-demo.js" para o demo levar o logo junto.

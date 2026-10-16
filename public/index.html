@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Supervisório de energia, água e grupo gerador">
+  <title>Supervisório de utilidades</title>
+  <link rel="icon" type="image/png" href="assets/marcas/icone.png">
+  <link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+  <nav class="coluna" aria-label="Telas">
+    <div class="marca">
+      <b>Painel</b>
+      <span>supervisório de utilidades</span>
+    </div>
+    <div class="menu" id="menu"></div>
+    <div class="rodape-coluna">
+      <span class="linha-estado"><span class="led" id="led-conexao"></span><span id="txt-conexao">conectando</span></span>
+      <span class="usuario" id="usuario">—</span>
+      <button class="botao escuro" id="btn-som">Som: ligado</button>
+      <button class="botao escuro" id="btn-sair" hidden>Sair</button>
+      <div class="assinatura" id="assinatura" data-marca-caixa hidden>
+        <span>desenvolvido por</span>
+        <img data-marca="engemase" alt="Engemase Engenharia">
+      </div>
+    </div>
+  </nav>
+
+  <div class="area">
+    <header class="cabecalho">
+      <h1 id="titulo-tela">Energia</h1>
+      <span class="isa" id="isa-tela"></span>
+      <span class="relogio"><span id="planta">—</span> · <span id="relogio">––</span></span>
+      <img class="logo-cliente" data-marca="cliente" alt="logo do cliente" hidden>
+    </header>
+
+    <div class="faixa-alarme" id="faixa-alarme" role="status">
+      <span class="quando" id="faixa-quando"></span>
+      <span class="msg" id="faixa-msg"></span>
+      <span class="resto" id="faixa-resto"></span>
+      <span class="acoes">
+        <button id="faixa-reconhecer">Reconhecer</button>
+        <button id="faixa-silenciar">Silenciar</button>
+      </span>
+    </div>
+
+    <div class="faixa-sim" id="faixa-sim" hidden>
+      Modo simulado — valores gerados pelo servidor, sem leitura dos equipamentos
+    </div>
+
+    <main class="tela" id="tela"></main>
+  </div>
+
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>

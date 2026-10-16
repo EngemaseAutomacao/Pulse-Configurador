@@ -1,0 +1,100 @@
+.tela-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.12)),
+    repeating-linear-gradient(90deg, #c5c9c3 0 3px, #c1c5bf 3px 6px);
+}
+
+.cartao-login {
+  width: 100%;
+  max-width: 380px;
+  background: var(--tela);
+  border: 1px solid var(--linha-forte);
+  border-radius: 2px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  overflow: hidden;
+}
+
+.logo-login { padding: 20px 22px 16px; background: #fff; text-align: center; border-bottom: 1px solid var(--linha); }
+.logo-login img { height: 52px; width: auto; max-width: 100%; object-fit: contain; }
+.assinatura-login { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 22px 14px;
+                    border-top: 1px solid var(--linha); background: #fff; }
+.assinatura-login span { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: #5b625c; }
+.assinatura-login img { height: 38px; width: auto; object-fit: contain; }
+
+.marca-login {
+  background: linear-gradient(180deg, var(--grafite-2), var(--grafite));
+  color: #eef0ec;
+  padding: 18px 22px;
+  position: relative;
+}
+.marca-login::before, .marca-login::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #9aa29b, #4a514b);
+}
+.marca-login::before { left: 10px; }
+.marca-login::after { right: 10px; }
+.marca-login b {
+  display: block;
+  font-family: var(--titulo);
+  font-size: 26px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.marca-login span {
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #8b938c;
+}
+
+.cartao-login form { padding: 20px 22px 8px; }
+.campo { display: block; margin-bottom: 14px; }
+.campo input {
+  width: 100%;
+  font-family: var(--corpo);
+  font-size: 15px;
+  padding: 9px 10px;
+  background: #fff;
+  color: var(--tinta);
+  border: 1px solid var(--linha-forte);
+  border-radius: 2px;
+}
+.campo input:focus-visible { outline: 2px solid var(--info); outline-offset: 1px; }
+
+.botao.primario {
+  width: 100%;
+  background: var(--grafite);
+  color: #eef0ec;
+  border-color: var(--grafite);
+  padding: 10px;
+  font-size: 14px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.botao.primario:hover { background: #333a3c; }
+.botao.primario[disabled] { opacity: .6; cursor: progress; }
+
+.aviso {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  background: #f6e3e3;
+  border-left: 3px solid var(--critico);
+  color: #7d1520;
+  font-size: 12.5px;
+}
+.instrucao { margin: 0 0 14px; font-size: 13px; color: var(--tinta-2); }
+.rodape-login {
+  margin: 0;
+  padding: 12px 22px 16px;
+  font-size: 11px;
+  color: var(--tinta-3);
+  border-top: 1px solid var(--linha);
+}

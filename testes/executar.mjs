@@ -21,6 +21,8 @@ import { Nuvem, LigacaoNuvem, validarLigacao } from '../src/nuvem.js';
 import os from 'node:os';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// dados/ fica fora do Git: num clone novo ela ainda não existe, e vários testes gravam bancos ali
+fs.mkdirSync(path.join(raiz, 'dados'), { recursive: true });
 const bruta = JSON.parse(fs.readFileSync(path.join(raiz, 'config.json'), 'utf8'));
 const { config: cfg, perfis } = prepararConfig(bruta, path.join(raiz, 'perfis'));
 

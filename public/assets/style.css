@@ -1,0 +1,333 @@
+/* Supervisório de energia — identidade visual de painel de comando.
+   Cores de fase seguem a convenção ABNT (marrom / preto / cinza), clareadas
+   para leitura em fundo escuro. Neutro azul-claro, terra verde. */
+
+:root {
+  --painel: #12181d;
+  --chapa: #1a232b;
+  --chapa-alta: #222e37;
+  --linha: #2f3f4b;
+  --linha-forte: #43596a;
+  --texto: #dfe8ee;
+  --texto-fraco: #7d94a3;
+
+  --fase-a: #c98a4b;
+  --fase-b: #9eb0bd;
+  --fase-c: #e6edf2;
+  --neutro: #4fa3d1;
+  --terra: #7cbf42;
+
+  --ok: #2fbf85;
+  --atencao: #f0b03c;
+  --critico: #ff5257;
+
+  --ui: system-ui, "Segoe UI", "DejaVu Sans", Roboto, sans-serif;
+  --dados: ui-monospace, "JetBrains Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+
+  --r: 3px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--painel);
+  color: var(--texto);
+  font-family: var(--ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Textura sutil de chapa metálica escovada, na horizontal */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 1px, transparent 1px 3px);
+  z-index: 0;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* ---------- Cabeçalho ---------- */
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 20px;
+  background: linear-gradient(180deg, #1d272f, #151d24);
+  border-bottom: 1px solid var(--linha-forte);
+}
+
+.identificacao { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+.identificacao b {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.etiqueta {
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.relogio {
+  margin-left: auto;
+  font-family: var(--dados);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-fraco);
+  white-space: nowrap;
+}
+
+.sinaleiro { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+
+.led {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--texto-fraco);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.6) inset;
+}
+.led.ok { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+.led.critico { background: var(--critico); box-shadow: 0 0 8px var(--critico); animation: pulsar 1.1s steps(2, end) infinite; }
+.led.atencao { background: var(--atencao); box-shadow: 0 0 8px var(--atencao); }
+
+@keyframes pulsar { 50% { opacity: .25; box-shadow: none; } }
+
+/* ---------- Navegação ---------- */
+
+.abas {
+  display: flex;
+  gap: 2px;
+  padding: 0 12px;
+  background: #10161b;
+  border-bottom: 1px solid var(--linha);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.abas::-webkit-scrollbar { display: none; }
+
+.aba {
+  appearance: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--texto-fraco);
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.aba:hover { color: var(--texto); }
+.aba[aria-selected="true"] { color: var(--texto); border-bottom-color: var(--fase-a); }
+.aba:focus-visible { outline: 2px solid var(--neutro); outline-offset: -2px; }
+
+.conteudo { padding: 18px 20px 40px; max-width: 1500px; margin: 0 auto; }
+
+/* ---------- Cartões ---------- */
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.cartao {
+  background: var(--chapa);
+  border: 1px solid var(--linha);
+  border-radius: var(--r);
+  padding: 14px 16px 16px;
+}
+
+.cartao > header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--linha);
+}
+.cartao > header h2 { font-size: 13px; font-weight: 600; margin: 0; letter-spacing: .02em; }
+.cartao > header .etiqueta { margin-left: auto; }
+
+.destaque { grid-column: 1 / -1; }
+
+/* ---------- Leituras ---------- */
+
+.leituras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 1px;
+  background: var(--linha);
+  border: 1px solid var(--linha);
+}
+
+.leitura {
+  background: var(--chapa);
+  padding: 10px 12px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-left: 2px solid transparent;
+}
+.leitura[data-fase="a"] { border-left-color: var(--fase-a); }
+.leitura[data-fase="b"] { border-left-color: var(--fase-b); }
+.leitura[data-fase="c"] { border-left-color: var(--fase-c); }
+.leitura[data-fase="n"] { border-left-color: var(--neutro); }
+.leitura.alarmada { background: color-mix(in srgb, var(--critico) 14%, var(--chapa)); border-left-color: var(--critico); }
+
+.valor {
+  font-family: var(--dados);
+  font-size: 27px;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
+.valor .un { font-size: 12px; color: var(--texto-fraco); margin-left: 4px; letter-spacing: 0; }
+.valor.vazio { color: var(--texto-fraco); }
+
+/* Régua de barras para comparar as três fases de relance */
+.barras { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
+.barra { display: grid; grid-template-columns: 22px 1fr 72px; align-items: center; gap: 10px; font-size: 11px; }
+.barra .nome { color: var(--texto-fraco); letter-spacing: .1em; text-transform: uppercase; }
+.barra .trilho { height: 6px; background: #0d1317; border: 1px solid var(--linha); overflow: hidden; }
+.barra .preenchimento { height: 100%; transition: width .45s cubic-bezier(.4,0,.2,1); }
+.barra .medida { font-family: var(--dados); text-align: right; font-variant-numeric: tabular-nums; }
+
+.offline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--critico);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+/* ---------- Unifilar (elemento assinatura) ---------- */
+
+.rolagem { overflow-x: auto; scrollbar-width: thin; }
+.unifilar { width: 100%; min-width: 780px; height: auto; display: block; }
+.unifilar .cond { stroke: var(--linha-forte); stroke-width: 2; fill: none; }
+.unifilar .cond.energizado { stroke: var(--terra); }
+.unifilar .cond.atencao-carga { stroke: var(--atencao); }
+.unifilar .cond.sobrecarga { stroke: var(--critico); stroke-width: 3; }
+.unifilar .fluxo {
+  stroke: var(--terra);
+  stroke-width: 2;
+  stroke-dasharray: 5 9;
+  fill: none;
+  opacity: .85;
+  animation: correr 1.4s linear infinite;
+}
+.unifilar .fluxo.atencao-carga { stroke: var(--atencao); }
+.unifilar .fluxo.sobrecarga { stroke: var(--critico); }
+
+.unifilar .trilho-svg { fill: #0d1317; stroke: var(--linha); stroke-width: 1; }
+.unifilar .carga { transition: width .5s cubic-bezier(.4,0,.2,1); }
+.unifilar .led-svg { stroke: rgba(0,0,0,.5); stroke-width: 1; }
+
+.unifilar .f-a { fill: var(--fase-a); }
+.unifilar .f-b { fill: var(--fase-b); }
+.unifilar .f-c { fill: var(--fase-c); }
+@keyframes correr { to { stroke-dashoffset: -28; } }
+
+.unifilar .caixa { fill: var(--chapa-alta); stroke: var(--linha-forte); stroke-width: 1; }
+.unifilar .barra-geral { stroke: var(--terra); stroke-width: 5; stroke-linecap: round; }
+.unifilar text { fill: var(--texto); font-family: var(--ui); font-size: 11px; }
+.unifilar .rot { fill: var(--texto-fraco); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
+.unifilar .simbolo { fill: var(--texto-fraco); font-family: var(--dados); font-size: 10px; }
+.unifilar .num { font-family: var(--dados); font-size: 13px; font-variant-numeric: tabular-nums; }
+.unifilar .alerta { fill: var(--critico); }
+
+@media (prefers-reduced-motion: reduce) {
+  .unifilar .fluxo { animation: none; }
+  .led.critico { animation: none; }
+}
+
+/* ---------- Gráfico ---------- */
+
+.controles { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+
+select, .botao {
+  appearance: none;
+  background: var(--chapa-alta);
+  color: var(--texto);
+  border: 1px solid var(--linha-forte);
+  border-radius: var(--r);
+  padding: 8px 12px;
+  font-family: var(--ui);
+  font-size: 12px;
+  cursor: pointer;
+}
+select:focus-visible, .botao:focus-visible { outline: 2px solid var(--neutro); outline-offset: 1px; }
+.botao:hover { background: #2b3a45; }
+
+.grupo { display: flex; border: 1px solid var(--linha-forte); border-radius: var(--r); overflow: hidden; }
+.grupo .botao { border: 0; border-radius: 0; border-right: 1px solid var(--linha-forte); }
+.grupo .botao:last-child { border-right: 0; }
+.grupo .botao[aria-pressed="true"] { background: var(--fase-a); color: #16110b; font-weight: 600; }
+
+canvas { width: 100%; height: 340px; display: block; }
+
+/* ---------- Tabelas de alarme ---------- */
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+  font-weight: 500;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--linha);
+}
+td { padding: 9px 10px; border-bottom: 1px solid #202b33; vertical-align: middle; }
+tbody tr:hover { background: #1e2831; }
+td.num { font-family: var(--dados); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.selo {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+  border: 1px solid;
+}
+.selo.alta { color: var(--critico); border-color: var(--critico); }
+.selo.media { color: var(--atencao); border-color: var(--atencao); }
+.selo.baixa { color: var(--neutro); border-color: var(--neutro); }
+.selo.normalizado { color: var(--ok); border-color: var(--ok); }
+
+.vazio-msg { color: var(--texto-fraco); font-size: 13px; padding: 28px 4px; text-align: center; }
+
+.faixa-sim {
+  background: repeating-linear-gradient(135deg, #2a2416 0 12px, #241f13 12px 24px);
+  border-bottom: 1px solid var(--atencao);
+  color: var(--atencao);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 7px 20px;
+}
+
+@media (max-width: 640px) {
+  .conteudo { padding: 14px 12px 32px; }
+  .topo { flex-wrap: wrap; gap: 10px 14px; }
+  .relogio { order: 3; margin-left: 0; }
+  .valor { font-size: 23px; }
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Painel — entrar</title>
+  <link rel="icon" type="image/png" href="assets/marcas/icone.png">
+  <link rel="stylesheet" href="assets/estilo.css">
+  <link rel="stylesheet" href="assets/login.css">
+</head>
+<body class="tela-login">
+  <main class="cartao-login">
+    <div class="logo-login" id="logo-login" data-marca-caixa hidden>
+      <img data-marca="cliente" alt="logo do cliente">
+    </div>
+    <div class="marca-login">
+      <b>Painel</b>
+      <span>supervisório de utilidades</span>
+    </div>
+
+    <form id="form" autocomplete="on">
+      <label class="campo">
+        <span class="rotulo">Usuário</span>
+        <input id="login" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      </label>
+      <label class="campo">
+        <span class="rotulo">Senha</span>
+        <input id="senha" name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <p class="aviso" id="aviso" hidden></p>
+      <button class="botao primario" id="entrar" type="submit">Entrar</button>
+    </form>
+
+    <form id="form-troca" hidden>
+      <p class="instrucao">Defina uma senha nova para continuar.</p>
+      <label class="campo">
+        <span class="rotulo">Senha atual</span>
+        <input id="atual" type="password" autocomplete="current-password" required>
+      </label>
+      <label class="campo">
+        <span class="rotulo">Senha nova</span>
+        <input id="nova" type="password" autocomplete="new-password" required>
+      </label>
+      <label class="campo">
+        <span class="rotulo">Repita a senha nova</span>
+        <input id="nova2" type="password" autocomplete="new-password" required>
+      </label>
+      <p class="aviso" id="aviso-troca" hidden></p>
+      <button class="botao primario" type="submit">Salvar e entrar</button>
+    </form>
+
+    <p class="rodape-login">Acesso restrito. Todas as ações ficam registradas.</p>
+    <div class="assinatura-login" id="assinatura-login" data-marca-caixa hidden>
+      <span>desenvolvido por</span>
+      <img data-marca="engemase" alt="Engemase Engenharia">
+    </div>
+  </main>
+  <script src="assets/login.js"></script>
+</body>
+</html>
