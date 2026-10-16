@@ -1,15 +1,30 @@
 /* Gráfico de tendência em canvas puro — sem CDN, porque a rede da
-   instalação costuma ser isolada. Paleta clara, coerente com a tela. */
+   instalação costuma ser isolada. As cores vêm das variáveis do tema
+   (claro ou escuro), lidas a cada desenho: trocar o tema redesenha certo. */
 
-const CORES = {
-  linha: '#23282a',
-  banda: 'rgba(35, 40, 42, .14)',
-  grade: '#c2c7c0',
-  texto: '#7a827b',
-  fundo: '#e8eae5',
+const lerVar = (nome, padrao) => {
+  try {
+    return getComputedStyle(document.documentElement).getPropertyValue(nome).trim() || padrao;
+  } catch {
+    return padrao;
+  }
 };
 
+function coresDoTema() {
+  return {
+    linha: lerVar('--tinta', '#0c2340'),
+    banda: lerVar('--banda-grafico', 'rgba(12, 35, 64, .12)'),
+    grade: lerVar('--linha', '#e3e8ee'),
+    texto: lerVar('--tinta-3', '#7f8a9d'),
+    fundo: lerVar('--tela', '#ffffff'),
+    critico: lerVar('--critico', '#c62f35'),
+    atencao: lerVar('--atencao', '#d99000'),
+    atencaoTexto: lerVar('--atencao-texto', '#8a5c00'),
+  };
+}
+
 export function desenharTendencia(canvas, pontos, { unidade = '', marcas = [] } = {}) {
+  const CORES = coresDoTema();
   const dpr = window.devicePixelRatio || 1;
   const larg = canvas.clientWidth;
   const alt = canvas.clientHeight;
@@ -27,7 +42,7 @@ export function desenharTendencia(canvas, pontos, { unidade = '', marcas = [] } 
 
   if (!pontos || pontos.length < 2) {
     ctx.fillStyle = CORES.texto;
-    ctx.font = '13px system-ui, sans-serif';
+    ctx.font = '13px Manrope, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('Sem registro no período.', larg / 2, alt / 2 - 8);
     ctx.fillText('O histórico começa a gravar assim que o servidor lê o equipamento.', larg / 2, alt / 2 + 12);
@@ -75,10 +90,10 @@ export function desenharTendencia(canvas, pontos, { unidade = '', marcas = [] } 
     if (y < m.c || y > m.c + h) continue;
     ctx.save();
     ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = marca.prioridade === 'alta' ? '#c1121f' : '#d99000';
+    ctx.strokeStyle = marca.prioridade === 'alta' ? CORES.critico : CORES.atencao;
     ctx.beginPath(); ctx.moveTo(m.e, y); ctx.lineTo(m.e + w, y); ctx.stroke();
     ctx.restore();
-    ctx.fillStyle = marca.prioridade === 'alta' ? '#c1121f' : '#8a5c00';
+    ctx.fillStyle = marca.prioridade === 'alta' ? CORES.critico : CORES.atencaoTexto;
     ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
     ctx.fillText(marca.rotulo, m.e + 4, y - 2);
   }
@@ -130,6 +145,7 @@ export const PALETA_SERIES = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87b
  * Devolve a geometria, para a tela converter a posição do mouse em instante.
  */
 export function desenharComparacao(canvas, series, { t0, t1, marcas = [], unidade = '' } = {}) {
+  const CORES = coresDoTema();
   const dpr = window.devicePixelRatio || 1;
   const larg = canvas.clientWidth;
   const alt = canvas.clientHeight;
@@ -148,7 +164,7 @@ export function desenharComparacao(canvas, series, { t0, t1, marcas = [], unidad
   const comDados = series.filter((s) => s.pontos && s.pontos.length >= 2);
   if (!comDados.length || !(t1 > t0)) {
     ctx.fillStyle = CORES.texto;
-    ctx.font = '13px system-ui, sans-serif';
+    ctx.font = '13px Manrope, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('Sem registro no período.', larg / 2, alt / 2);
     return null;
@@ -201,10 +217,10 @@ export function desenharComparacao(canvas, series, { t0, t1, marcas = [], unidad
       if (y < m.c || y > m.c + h) continue;
       ctx.save();
       ctx.setLineDash([4, 4]);
-      ctx.strokeStyle = marca.prioridade === 'alta' ? '#c1121f' : '#d99000';
+      ctx.strokeStyle = marca.prioridade === 'alta' ? CORES.critico : CORES.atencao;
       ctx.beginPath(); ctx.moveTo(m.e, y); ctx.lineTo(m.e + w, y); ctx.stroke();
       ctx.restore();
-      ctx.fillStyle = marca.prioridade === 'alta' ? '#c1121f' : '#8a5c00';
+      ctx.fillStyle = marca.prioridade === 'alta' ? CORES.critico : CORES.atencaoTexto;
       ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
       ctx.fillText(marca.rotulo, m.e + 4, y - 2);
     }

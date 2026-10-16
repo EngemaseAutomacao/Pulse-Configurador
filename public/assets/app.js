@@ -95,14 +95,45 @@ function silenciar() {
 
 /* ------------------------------------------------------------- navegação */
 
+/* Ícones do menu: os mesmos traços do Engemase Pulse (Lucide, licença ISC). */
+const ICONE_SVG = (corpo) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${corpo}</svg>`;
+const ICONES = {
+  energia: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  unifilar: '<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>',
+  consumo: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  agua: '<path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/>',
+  gerador: '<line x1="3" x2="15" y1="22" y2="22"/><line x1="4" x2="14" y1="9" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/>',
+  historico: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/>',
+  alarmes: '<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>',
+  engenharia: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  usuarios: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+};
+/** Seções do menu, como no Pulse. A ordem segue o CATALOGO. */
+const SECAO_DA_TELA = {
+  energia: 'Operação', unifilar: 'Operação', consumo: 'Operação',
+  agua: 'Utilidades', gerador: 'Utilidades',
+  historico: 'Registros', alarmes: 'Registros',
+  engenharia: 'Configuração', usuarios: 'Configuração',
+};
+
 function montarMenu() {
   const menu = $('#menu');
-  menu.innerHTML = TELAS.map((t) => `
+  let secao = null;
+  menu.innerHTML = TELAS.map((t) => {
+    const nova = SECAO_DA_TELA[t.id] || '';
+    const titulo = nova && nova !== secao ? `<span class="secao-menu">${esc(nova)}</span>` : '';
+    secao = nova;
+    return `${titulo}
     <button class="item" data-tela="${t.id}" aria-current="${t.id === estado.tela ? 'page' : 'false'}">
+      <span class="icone">${ICONES[t.id] ? ICONE_SVG(ICONES[t.id]) : ''}</span>
+      <span class="rotulos">
+        <span class="nome">${esc(t.nome)}</span>
+        <span class="isa">${esc(t.isa || '')}</span>
+      </span>
       <span class="contagem" data-contagem="${t.id}" hidden></span>
-      <span class="isa">${esc(t.isa || '')}</span>
-      <span class="nome">${esc(t.nome)}</span>
-    </button>`).join('');
+    </button>`;
+  }).join('');
   menu.addEventListener('click', (ev) => {
     const b = ev.target.closest('[data-tela]');
     if (b) abrir(b.dataset.tela);
@@ -389,6 +420,26 @@ async function iniciar() {
     som.proximoToque = 0;
     $('#btn-som').textContent = `Som: ${som.ligado ? 'ligado' : 'desligado'}`;
     desenhar();
+  });
+
+  // tema claro/escuro (assets/tema.js): automático → claro → escuro
+  const NOME_TEMA = { automatico: 'automático', claro: 'claro', escuro: 'escuro' };
+  const PROXIMO_TEMA = { automatico: 'claro', claro: 'escuro', escuro: 'automatico' };
+  const rotularTema = () => {
+    $('#btn-tema').textContent = `Tema: ${NOME_TEMA[window.PulseTema?.escolha() || 'automatico']}`;
+  };
+  rotularTema();
+  $('#btn-tema').addEventListener('click', () => {
+    window.PulseTema?.trocar(PROXIMO_TEMA[window.PulseTema.escolha()] || 'automatico');
+    rotularTema();
+  });
+  // os gráficos em canvas pegam as cores na hora de desenhar: remonta a tela aberta
+  window.addEventListener('tema', () => {
+    if (!telaAtual) return;
+    const id = estado.tela;
+    telaAtual.destruir?.();
+    telaAtual = null;
+    abrir(id);
   });
 
   // o navegador só libera áudio depois de um gesto do operador

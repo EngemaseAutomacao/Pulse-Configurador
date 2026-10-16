@@ -83,7 +83,7 @@ function marcasEmbutidas() {
   const tipos = { svg: 'image/svg+xml', png: 'image/png', webp: 'image/webp' };
   const saida = {};
   if (!fs.existsSync(dir)) return saida;
-  for (const nome of ['cliente', 'engemase']) {
+  for (const nome of ['cliente', 'engemase', 'engemase-simbolo']) {
     const ext = Object.keys(tipos).find((x) => fs.existsSync(path.join(dir, `${nome}.${x}`)));
     if (ext) saida[nome] = `data:${tipos[ext]};base64,${fs.readFileSync(path.join(dir, `${nome}.${ext}`)).toString('base64')}`;
   }
@@ -122,8 +122,10 @@ const saida = ler('public/index.html')
     return fs.existsSync(icone)
       ? `<link rel="icon" type="image/png" href="data:image/png;base64,${fs.readFileSync(icone).toString('base64')}">` : '';
   })
-  .replace('<title>Supervisório de utilidades</title>',
-    () => '<title>Supervisório de utilidades — demonstração</title>')
+  .replace('<title>Engemase Pulse Configurador</title>',
+    () => '<title>Engemase Pulse Configurador — demonstração</title>')
+  // o tema (claro/escuro) roda antes de desenhar; no demo vai embutido
+  .replace('<script src="assets/tema.js"></script>', () => `<script>\n${ler('public/assets/tema.js')}\n</script>`)
   .replace('<script type="module" src="assets/app.js"></script>',
     // script clássico, não módulo: o pacote já não tem import/export, e assim o
     // arquivo abre direto do disco (file://) sem esbarrar em regra de módulo

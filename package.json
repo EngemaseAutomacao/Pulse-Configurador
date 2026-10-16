@@ -25,5 +25,5 @@
     "modbus-serial": "^8.0.17",
     "ws": "^8.18.0"
   },
-  "_fontes": "As fontes em public/assets/fontes/ vêm de @fontsource/source-sans-3 e @fontsource/archivo (licença SIL OFL). Já acompanham o projeto: não é preciso instalar nada."
+  "_fontes": "As fontes em public/assets/fontes/ vêm de @fontsource/manrope e @fontsource/sora (licença SIL OFL), as mesmas do Engemase Pulse. Já acompanham o projeto: não é preciso instalar nada."
 }

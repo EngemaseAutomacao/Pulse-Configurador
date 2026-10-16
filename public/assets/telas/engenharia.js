@@ -22,6 +22,40 @@ export const telaEngenharia = {
     const eqs = estado.config.equipamentos;
     return `
       <section class="bloco">
+        ${placa('', 'Nuvem · Engemase Pulse')}
+        <div class="corpo">
+          <p class="nota">Liga este gateway à unidade no Engemase Pulse. No Pulse, em
+            <b>Administração › Unidades › (a unidade) › Gerar token</b>, copie o token e cole aqui.
+            Pode colar o trecho inteiro que o Pulse mostra: vale o <code>pnl_…</code> de dentro.
+            O envio começa na hora, sem reiniciar o serviço.</p>
+          <div class="nuvem-estado" id="n-estado">carregando…</div>
+          <div class="campos-secao">
+            <label class="campo-secao"><span class="rotulo">Endereço do Pulse</span>
+              <input class="entrada" id="n-url" autocomplete="off" spellcheck="false"
+                placeholder="https://engemase-pulse.vercel.app"></label>
+            <label class="campo-secao"><span class="rotulo">Token da unidade</span>
+              <input class="entrada" id="n-token" type="password" autocomplete="off" spellcheck="false"
+                placeholder="pnl_…">
+              <span class="dica" id="n-token-dica">cole o token gerado no Pulse</span></label>
+          </div>
+          <div class="nuvem-modulos">
+            <span class="rotulo">Módulos que esta unidade usa no Pulse</span>
+            <label><input type="checkbox" id="n-auto" checked> automático, pelo que existe nesta instalação</label>
+            <span class="nuvem-lista">
+              <label><input type="checkbox" data-n-modulo="energia"> Energia</label>
+              <label><input type="checkbox" data-n-modulo="agua"> Água</label>
+              <label><input type="checkbox" data-n-modulo="gerador"> Gerador</label>
+            </span>
+          </div>
+          <div class="controles">
+            <button class="botao destaque" id="n-salvar">Salvar e ligar</button>
+            <button class="botao" id="n-remover" hidden>Remover ligação</button>
+          </div>
+          <div id="n-saida"></div>
+        </div>
+      </section>
+
+      <section class="bloco">
         ${placa('', 'Varredura do barramento')}
         <div class="corpo">
           <p class="nota">Percorre os endereços procurando quem responde, na RS-485 ou
@@ -114,7 +148,7 @@ export const telaEngenharia = {
       <section class="bloco">
         ${placa('', 'Seções da instalação')}
         <div class="corpo">
-          <p class="nota">Os números que variam de loja para loja: tanque, consumo,
+          <p class="nota">Os números que variam de unidade para unidade: tanque, consumo,
             reservatório e limites de bateria. O resto — estados, modos e lista de falhas —
             vem do perfil do equipamento. Aplicam junto com os equipamentos, no botão acima.</p>
           <div id="sec-formulario"></div>
@@ -125,7 +159,7 @@ export const telaEngenharia = {
         ${placa('', 'Perfis de equipamento')}
         <div class="corpo">
           <p class="nota">O mapa de registradores de cada modelo mora aqui.
-            O arquivo da loja só aponta o perfil, o endereço e o nome do circuito.</p>
+            O arquivo da unidade só aponta o perfil, o endereço e o nome do circuito.</p>
           <div id="p-saida"></div>
         </div>
       </section>`;
@@ -173,10 +207,96 @@ export const telaEngenharia = {
     $('#eq-aplicar', raiz).addEventListener('click', () => this.salvarEquipamentos(raiz, false));
     $('#eq-desfazer', raiz).addEventListener('click', () => this.carregarEquipamentos(raiz));
 
+    $('#n-auto', raiz).addEventListener('change', () => this.marcarModulos(raiz));
+    $('#n-salvar', raiz).addEventListener('click', () => this.salvarNuvem(raiz));
+    $('#n-remover', raiz).addEventListener('click', () => this.removerNuvem(raiz));
+
     this.diagnostico(raiz);
     this.perfis(raiz);
     this.carregarEquipamentos(raiz);
-    this._diag = setInterval(() => this.diagnostico(raiz), 5000);
+    this.nuvem(raiz, true);
+    this._diag = setInterval(() => { this.diagnostico(raiz); this.nuvem(raiz, false); }, 5000);
+  },
+
+  /* ------------------------------------------------------------------ nuvem */
+
+  /** Estado da ligação com o Pulse. `preencher` só na abertura: depois, não
+      apaga o que o técnico está digitando. O token nunca volta do servidor. */
+  async nuvem(raiz, preencher) {
+    const caixa = $('#n-estado', raiz);
+    if (!caixa) return;
+    let r;
+    try {
+      r = await api('/api/eng/nuvem');
+    } catch (e) {
+      caixa.innerHTML = `<span class="selo alta">indisponível</span> ${esc(e.message)}`;
+      return;
+    }
+    this._nuvem = r;
+    const origem = r.origem === 'interface' ? 'gravada nesta tela'
+      : r.origem === 'configuracao' ? 'vinda do config.json' : '';
+    let situacao;
+    if (!r.ativa) situacao = '<span class="selo baixa">não ligado</span> Este gateway ainda não envia para o Pulse.';
+    else if (r.erro) situacao = `<span class="selo alta">sem envio</span> ${esc(r.erro)}`;
+    else if (r.ultimo_sucesso) situacao = `<span class="selo ok">enviando</span> último envio ${esc(dataHora(r.ultimo_sucesso))}`;
+    else situacao = '<span class="selo media">aguardando</span> ligação salva, esperando o primeiro envio';
+    const detalhes = r.ativa
+      ? `<span class="nuvem-detalhe">${esc(r.url || '')} · token …${esc(r.token_final || '')}${origem ? ` · ${origem}` : ''}</span>`
+      : '';
+    caixa.innerHTML = `${situacao}${detalhes}`;
+    $('#n-remover', raiz).hidden = r.origem !== 'interface';
+
+    if (preencher) {
+      $('#n-url', raiz).value = r.url || 'https://engemase-pulse.vercel.app';
+      $('#n-token-dica', raiz).textContent = r.token_final
+        ? `em branco mantém o token atual (…${r.token_final})` : 'cole o token gerado no Pulse';
+      const escolhidos = r.modulos;
+      $('#n-auto', raiz).checked = !escolhidos;
+      for (const c of $$('[data-n-modulo]', raiz)) {
+        c.checked = (escolhidos || r.modulos_em_uso || []).includes(c.dataset.nModulo);
+      }
+      this.marcarModulos(raiz);
+    }
+  },
+
+  marcarModulos(raiz) {
+    const auto = $('#n-auto', raiz).checked;
+    for (const c of $$('[data-n-modulo]', raiz)) {
+      c.disabled = auto;
+      if (auto) c.checked = (this._nuvem?.modulos_em_uso || []).includes(c.dataset.nModulo);
+    }
+  },
+
+  async salvarNuvem(raiz) {
+    const saida = $('#n-saida', raiz);
+    const botao = $('#n-salvar', raiz);
+    const corpo = { url: $('#n-url', raiz).value.trim(), token: $('#n-token', raiz).value };
+    if (!$('#n-auto', raiz).checked) {
+      corpo.modulos = $$('[data-n-modulo]', raiz).filter((c) => c.checked).map((c) => c.dataset.nModulo);
+    }
+    botao.disabled = true;
+    try {
+      await api('/api/eng/nuvem', { method: 'POST', body: JSON.stringify(corpo) });
+      $('#n-token', raiz).value = '';
+      saida.innerHTML = '<div class="resultado ok">Ligação salva. O envio para o Pulse começa em alguns segundos.</div>';
+      await this.nuvem(raiz, true);
+    } catch (e) {
+      saida.innerHTML = `<div class="resultado ruim">${esc(e.message)}</div>`;
+    } finally {
+      botao.disabled = false;
+    }
+  },
+
+  async removerNuvem(raiz) {
+    if (!confirm('Remover a ligação com o Pulse feita por esta tela? O gateway para de enviar (a não ser que o config.json tenha a seção "nuvem").')) return;
+    const saida = $('#n-saida', raiz);
+    try {
+      await api('/api/eng/nuvem/remover', { method: 'POST' });
+      saida.innerHTML = '<div class="resultado ok">Ligação removida.</div>';
+      await this.nuvem(raiz, true);
+    } catch (e) {
+      saida.innerHTML = `<div class="resultado ruim">${esc(e.message)}</div>`;
+    }
   },
 
   /* ------------------------------------------------------------ equipamentos */

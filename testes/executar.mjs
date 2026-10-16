@@ -2625,5 +2625,30 @@ console.log('\nLigação com a nuvem pela interface');
     /^dados\/$/m.test(fs.readFileSync(path.join(raiz, '.gitignore'), 'utf8')));
 }
 
+console.log('\nIdentidade Engemase Pulse e tela da nuvem');
+{
+  const idx = fs.readFileSync(path.join(raiz, 'public/index.html'), 'utf8');
+  const lgn = fs.readFileSync(path.join(raiz, 'public/login.html'), 'utf8');
+  for (const [nome, html] of [['index.html', idx], ['login.html', lgn]]) {
+    ok(`${nome}: tema aplicado antes do estilo (não pisca no tema errado)`,
+      html.indexOf('assets/tema.js') > 0 && html.indexOf('assets/tema.js') < html.indexOf('assets/estilo.css'));
+    ok(`${nome}: símbolo da Engemase no topo`, /data-marca="engemase-simbolo"/.test(html));
+  }
+  const srvT = fs.readFileSync(path.join(raiz, 'server.js'), 'utf8');
+  ok('o login carrega o tema sem sessão', /assets\\\/\(estilo\|login\|tema\)\\\.\(css\|js\)/.test(srvT));
+  const css = fs.readFileSync(path.join(raiz, 'public/assets/estilo.css'), 'utf8');
+  ok('tema escuro definido por variáveis', /:root\[data-tema="escuro"\]\s*\{[^}]*--tela:/.test(css));
+  ok('o grafite antigo não sobrou no estilo', !/--grafite/.test(css));
+  const graf = fs.readFileSync(path.join(raiz, 'public/assets/grafico.js'), 'utf8');
+  ok('gráficos pegam as cores do tema', /getComputedStyle/.test(graf) && !/'#e8eae5'/.test(graf));
+  const eng = fs.readFileSync(path.join(raiz, 'public/assets/telas/engenharia.js'), 'utf8');
+  ok('Engenharia tem o cartão da nuvem', /api\('\/api\/eng\/nuvem'\)/.test(eng) && /\/api\/eng\/nuvem\/remover/.test(eng));
+  ok('o campo do token é de senha e nunca é preenchido pela tela',
+    /id="n-token" type="password"/.test(eng) && !/#n-token', raiz\)\.value = r\./.test(eng));
+  ok('demo leva o tema e o símbolo embutidos',
+    /assets\/tema\.js/.test(fs.readFileSync(path.join(raiz, 'tools/gerar-demo.js'), 'utf8'))
+    && /'engemase-simbolo'/.test(fs.readFileSync(path.join(raiz, 'tools/gerar-demo.js'), 'utf8')));
+}
+
 console.log(`\n${passou} passaram, ${falhou} falharam\n`);
 process.exit(falhou ? 1 : 0);

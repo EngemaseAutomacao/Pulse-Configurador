@@ -25,7 +25,7 @@ const SEM_GERADOR = {
       + 'descubra em que endereço ela responde.',
     'Em <b>Engenharia → Equipamentos</b>, acrescente o gerador escolhendo o perfil da marca '
       + '(<b>gerador-generico</b> serve de ponto de partida) e informe o endereço.',
-    'Na configuração da loja, preencha a seção <b>gerador</b> com a capacidade do tanque, '
+    'Na configuração da unidade, preencha a seção <b>gerador</b> com a capacidade do tanque, '
       + 'o consumo e as marcas de nível — é dela que saem autonomia e indicadores.',
   ],
 };

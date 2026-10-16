@@ -37,20 +37,25 @@ deixar um monitor de parede fixo em uma delas.
 
 ## A interface
 
-O desenho segue a lógica de **HMI de alto desempenho (ISA-101)**, e não a de painel
-colorido: em operação normal a tela é cinza e monocromática; vermelho, âmbar e azul
-aparecem **apenas** quando algo sai do esperado. O operador aprende que cor significa
-problema, e enxerga uma anormalidade do outro lado da sala sem ler número nenhum.
+A identidade é a mesma do **Engemase Pulse** (a nuvem): logo e azul da Engemase,
+superfícies neutras, cartões arredondados, menu com ícones e **tema claro, escuro ou
+automático** (segue o aparelho; o botão "Tema" no rodapé do menu troca, e a escolha fica
+no navegador).
 
-A tipografia acompanha essa lógica e viaja com o produto, sem CDN:
-**Archivo** nos títulos e placas (grotesca de sinalização) e **Source Sans 3**
-no corpo e nos valores. Os números usam **dígitos tabulares** em vez de fonte
+Por baixo, o desenho continua seguindo a lógica de **HMI de alto desempenho (ISA-101)**:
+em operação normal a tela é neutra; vermelho e âmbar aparecem **apenas** quando algo sai
+do esperado, e o azul da marca fica só na moldura (menu, botões, seleção), nunca nos
+valores do processo. O operador aprende que cor significa problema, e enxerga uma
+anormalidade do outro lado da sala sem ler número nenhum.
+
+A tipografia viaja com o produto, sem CDN: **Sora** nos títulos e **Manrope** no corpo
+e nos valores, as mesmas do Pulse. Os números usam **dígitos tabulares** em vez de fonte
 monoespaçada: alinham na coluna sem o aspecto rígido de terminal.
 
 Outras decisões deliberadas:
 
-- **Placas de identificação gravadas** como cabeçalho de cada bloco, com a tag ISA
-  (QGBT-01, TQ-01, GMG-01) — a mesma nomenclatura da porta do painel e do projeto elétrico.
+- **Tag ISA** no título de cada cartão (QGBT-01, TQ-01, GMG-01) — a mesma nomenclatura
+  da porta do painel e do projeto elétrico.
 - **Cores de fase conforme ABNT**: marrom, preto e cinza para I1, I2 e I3; azul no neutro.
 - **Anunciador de falhas** do gerador reproduzindo o painel físico, inclusive a marcação de
   **primeira falha** (a janela que acendeu primeiro fica com "1ª"), que é o que interessa
@@ -591,7 +596,8 @@ src/db.js                     histórico e registro de alarmes em SQLite
 src/simulador.js              planta simulada para o modo --sem-modbus
 public/index.html             casca da interface
 public/assets/estilo.css      identidade visual
-public/assets/fontes/         Archivo e Source Sans 3 (SIL OFL), servidas localmente
+public/assets/fontes/         Manrope e Sora (SIL OFL), servidas localmente
+public/assets/tema.js         tema claro/escuro/automático, antes de desenhar a página
 public/assets/nucleo.js       estado, vínculos de dados e conexão
 public/assets/grafico.js      gráfico de tendência em canvas
 public/assets/telas/*.js      uma tela por arquivo

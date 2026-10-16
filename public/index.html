@@ -3,22 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <meta name="description" content="Supervisório de energia, água e grupo gerador">
-  <title>Supervisório de utilidades</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Engemase Pulse Configurador · Supervisório de energia, água e grupo gerador no gateway da unidade">
+  <title>Engemase Pulse Configurador</title>
   <link rel="icon" type="image/png" href="assets/marcas/icone.png">
+  <script src="assets/tema.js"></script>
   <link rel="stylesheet" href="assets/estilo.css">
 </head>
 <body>
   <nav class="coluna" aria-label="Telas">
     <div class="marca">
-      <b>Painel</b>
-      <span>supervisório de utilidades</span>
+      <img class="marca-simbolo" data-marca="engemase-simbolo" alt="" hidden>
+      <span class="marca-texto">
+        <b>Engemase Pulse</b>
+        <span>Configurador</span>
+      </span>
     </div>
     <div class="menu" id="menu"></div>
     <div class="rodape-coluna">
       <span class="linha-estado"><span class="led" id="led-conexao"></span><span id="txt-conexao">conectando</span></span>
       <span class="usuario" id="usuario">—</span>
+      <button class="botao escuro" id="btn-tema" title="Automático segue o tema do aparelho">Tema: automático</button>
       <button class="botao escuro" id="btn-som">Som: ligado</button>
       <button class="botao escuro" id="btn-sair" hidden>Sair</button>
       <div class="assinatura" id="assinatura" data-marca-caixa hidden>

@@ -26,11 +26,12 @@ configurador ── HTTPS, só de saída, a cada 10 s ──▶   POST /api/inge
 
 1. Na nuvem: **Administração → Unidades → (a unidade) → Gateway da unidade → Gerar token**.
    O token aparece uma única vez; a tela mostra o trecho pronto.
-2. No configurador, com um usuário **técnico**: cole o endereço do Pulse e o token. Pode
+2. No configurador, com um usuário **técnico**, em **Engenharia → Nuvem · Engemase Pulse**:
+   cole o endereço do Pulse e o token. Pode
    colar o trecho inteiro que a tela do Pulse mostra: vale o `pnl_…` de dentro. Os módulos
    são opcionais (sem escolher, vale o que existe na instalação). O envio começa na hora,
-   sem reiniciar o serviço. (A tela entra junto com a pasta `public/`, que ainda não está
-   neste repositório; até lá, use as rotas abaixo ou a configuração.)
+   sem reiniciar o serviço. O cartão mostra se está enviando, o último envio e o erro,
+   se houver; o token nunca volta para a tela (só os 4 últimos caracteres).
 
    A ligação fica em `dados/nuvem-<configuração>.json` (ex.: `dados/nuvem-config.planta.json`),
    com permissão só para o serviço — fora do `config.json`, das versões salvas pela Engenharia

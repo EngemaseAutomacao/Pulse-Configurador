@@ -1027,7 +1027,7 @@ app.get('/demo.html', (_req, res) => res.status(404).json({ erro: 'a demonstraç
 app.use((req, res, next) => {
   // a interface só é servida para quem já entrou; a tela de login, o CSS dela,
   // as fontes que o CSS pede e os logos que ela mostra ficam livres
-  const livre = /^\/(login\.html|assets\/(estilo|login)\.(css|js)|assets\/fontes\/[\w.-]+\.woff2|assets\/marcas\/[\w-]+\.(svg|png|webp))$/.test(req.path);
+  const livre = /^\/(login\.html|assets\/(estilo|login|tema)\.(css|js)|assets\/fontes\/[\w.-]+\.woff2|assets\/marcas\/[\w-]+\.(svg|png|webp))$/.test(req.path);
   if (!req.usuario && !livre) {
     res.status(401);
     return enviarPagina(res, 'login.html');
