@@ -259,7 +259,9 @@ export class Nuvem {
       };
       if (grupo === 'agua' || grupo === 'gerador') {
         const secao = grupo === 'agua' ? 'caixa_agua' : 'gerador';
-        linha.parametros = config[secao]?.medidor === e.id ? parametrosDe(config[secao], PARAMETROS[secao]) : null;
+        const daqui = config[secao]?.medidor === e.id;
+        linha.parametros = daqui ? parametrosDe(config[secao], PARAMETROS[secao]) : null;
+        linha.marcas = daqui ? marcasDe(config[secao].marcas) : null;
         linha.tags = (d.tags || [])
           .filter((t) => t?.nome && !t.oculto)
           .slice(0, 200)
@@ -559,6 +561,25 @@ function parametrosDe(secao, chaves) {
     else if (typeof v === 'boolean') saida[chave] = v;
   }
   return Object.keys(saida).length ? saida : null;
+}
+
+/**
+ * Linhas de nível do reservatório ou do tanque ("alto 97 %", "partida da bomba
+ * 60 %"), no formato que a nuvem aceita: 0–100 %, rótulo curto, no máximo 12.
+ * A nuvem antiga ignora o campo.
+ */
+function marcasDe(marcas) {
+  if (!Array.isArray(marcas)) return null;
+  const saida = marcas
+    .filter((m) => m && Number.isFinite(m.valor) && m.valor >= 0 && m.valor <= 100
+      && typeof m.rotulo === 'string' && m.rotulo.trim())
+    .slice(0, 12)
+    .map((m) => ({
+      valor: m.valor,
+      rotulo: m.rotulo.trim().slice(0, 60),
+      prioridade: typeof m.prioridade === 'string' ? m.prioridade.slice(0, 20) : null,
+    }));
+  return saida.length ? saida : null;
 }
 
 /** Só números (bits viram 0/1): a nuvem recusa o envio inteiro se vier texto. */

@@ -2520,6 +2520,16 @@ console.log('\nLigação com a nuvem pela interface');
     n.falhas === 0 && n.esperaAte === 0 && !n.equipamentosAceitos && marcas.get('nuvem_resumo_ate') === null && marcas.get('nuvem_consumo_rowid') === null);
   ok('módulos gravados na tela mandam no que vai para o Pulse',
     (ligacao.gravar({ ...v.dados, modulos: ['energia', 'agua'] }), n.modulos().join() === 'energia,agua'));
+  cfgN.medidores.push({ id: 'clp', grupo: 'agua', tags: [] });
+  cfgN.caixa_agua = {
+    medidor: 'clp', capacidade_litros: 20000,
+    marcas: [{ valor: 97, rotulo: 'alto', prioridade: 'media' }, { valor: 150, rotulo: 'fora' }, { valor: 15, rotulo: ' crítico ', prioridade: 'alta' }, { valor: 40 }],
+  };
+  const eqsN = n.equipamentos({ equipamentos: { clp: { id: 'clp', online: true, valores: { nivel: 50 } }, geral: { id: 'geral', online: true, valores: {} } } });
+  const clpN = eqsN.find((e) => e.id === 'clp');
+  ok('linhas de nível vão junto do reservatório (só as válidas, rótulo aparado)',
+    JSON.stringify(clpN.marcas) === JSON.stringify([{ valor: 97, rotulo: 'alto', prioridade: 'media' }, { valor: 15, rotulo: 'crítico', prioridade: 'alta' }]));
+  ok('medidor de energia não leva linhas de nível', !('marcas' in eqsN.find((e) => e.id === 'geral')));
   ligacao.apagar();
   ok('remover a ligação da tela volta para a seção do config.json', n.conf.url === 'https://antigo.com' && !fs.existsSync(arquivo));
   fs.rmSync(pasta, { recursive: true, force: true });
