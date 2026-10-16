@@ -1,7 +1,7 @@
 {
   "name": "pulse-configurador",
   "version": "3.2.0",
-  "description": "Engemase Pulse Configurador: supervisorio de energia, agua e grupo gerador via Modbus RTU no gateway da unidade",
+  "description": "Engemase Pulse Configurador: configuracao do gateway da unidade (equipamentos Modbus, comunicacao e ligacao com o Engemase Pulse)",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -11,8 +11,7 @@
     "bancada-demo": "node server.js --config config.fx3u.json --sem-modbus --roteiro",
     "planta": "node server.js --config config.planta.json",
     "planta-demo": "node server.js --config config.planta.json --sem-modbus --roteiro",
-    "teste": "node testes/executar.mjs && node testes/executar-comandos.mjs && node tools/gerar-demo.js && node testes/executar-demo.mjs",
-    "gerar-demo": "node tools/gerar-demo.js",
+    "teste": "node testes/executar.mjs",
     "orcamento": "node tools/orcamento.js",
     "certificado": "node tools/gerar-certificado.js"
   },

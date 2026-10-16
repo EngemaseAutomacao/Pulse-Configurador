@@ -26,7 +26,7 @@ configurador ── HTTPS, só de saída, a cada 10 s ──▶   POST /api/inge
 
 1. Na nuvem: **Administração → Unidades → (a unidade) → Gateway da unidade → Gerar token**.
    O token aparece uma única vez; a tela mostra o trecho pronto.
-2. No configurador, com um usuário **técnico**, em **Engenharia → Nuvem · Engemase Pulse**:
+2. No configurador, com um usuário **técnico**, na tela **Nuvem**:
    cole o endereço do Pulse e o token. Pode
    colar o trecho inteiro que a tela do Pulse mostra: vale o `pnl_…` de dentro. Os módulos
    são opcionais (sem escolher, vale o que existe na instalação). O envio começa na hora,

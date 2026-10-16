@@ -43,6 +43,15 @@ export function duracao(ms) {
 export const esc = (t) => String(t ?? '').replace(/[&<>"]/g,
   (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+/** Título de cada cartão: nome em destaque e a TAG ISA discreta ao lado. */
+export function placa(isa, titulo, idEquipamento) {
+  return `<div class="placa">
+    <span class="isa">${esc(isa || '')}</span>
+    <span class="titulo">${esc(titulo)}</span>
+    ${idEquipamento ? `<span class="estado" data-estado="${idEquipamento}">em serviço</span>` : ''}
+  </div>`;
+}
+
 /* ------------------------------------------------------------- consultas */
 
 export function equipamento(id) {
@@ -293,33 +302,9 @@ export async function api(rota, opcoes = {}) {
   return dados;
 }
 
-/* ------------------------------------------------------- séries históricas */
+/* ------------------------------------------------------- modo de demonstração */
 
+// O demo.html (interface empacotada, sem servidor) saiu junto com as telas de
+// leitura; o sinal fica para a Engenharia continuar sabendo que não há demo.
 export const MODO_DEMO = window.DEMO_EMBUTIDO === true
   || new URLSearchParams(location.search).has('demo');
-
-/** Série sintética para o modo demonstração, com perfil de dia comercial. */
-function serieSimulada(tag, horas) {
-  const base = valor(tag) ?? 50;
-  const ate = Date.now();
-  const n = 200;
-  const passo = (horas * 3600000) / n;
-  return Array.from({ length: n }, (_, i) => {
-    const t = ate - (n - i) * passo;
-    const h = new Date(t).getHours();
-    const jornada = h >= 7 && h <= 21 ? 1 : 0.45;
-    const med = base * jornada * (1 + 0.06 * Math.sin(i / 8) + (Math.random() - 0.5) * 0.03);
-    const disp = Math.abs(med) * 0.05;
-    return { t, med, min: med - disp, max: med + disp };
-  });
-}
-
-export async function serie(tag, horas) {
-  if (MODO_DEMO) return serieSimulada(tag, horas);
-  try {
-    const r = await api(`/api/historico?tag=${encodeURIComponent(tag)}&horas=${horas}`);
-    return r.pontos;
-  } catch {
-    return [];
-  }
-}

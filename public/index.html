@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="Engemase Pulse Configurador · Supervisório de energia, água e grupo gerador no gateway da unidade">
+  <meta name="description" content="Engemase Pulse Configurador · Supervisório de utilidades: configuração do gateway da unidade">
   <title>Engemase Pulse Configurador</title>
   <link rel="icon" type="image/png" href="assets/marcas/icone.png">
   <script src="assets/tema.js"></script>
@@ -24,7 +24,6 @@
       <span class="linha-estado"><span class="led" id="led-conexao"></span><span id="txt-conexao">conectando</span></span>
       <span class="usuario" id="usuario">—</span>
       <button class="botao escuro" id="btn-tema" title="Automático segue o tema do aparelho">Tema: automático</button>
-      <button class="botao escuro" id="btn-som">Som: ligado</button>
       <button class="botao escuro" id="btn-sair" hidden>Sair</button>
       <div class="assinatura" id="assinatura" data-marca-caixa hidden>
         <span>desenvolvido por</span>
@@ -35,21 +34,10 @@
 
   <div class="area">
     <header class="cabecalho">
-      <h1 id="titulo-tela">Energia</h1>
+      <h1 id="titulo-tela">Início</h1>
       <span class="isa" id="isa-tela"></span>
       <span class="relogio"><span id="planta">—</span> · <span id="relogio">––</span></span>
-      <img class="logo-cliente" data-marca="cliente" alt="logo do cliente" hidden>
     </header>
-
-    <div class="faixa-alarme" id="faixa-alarme" role="status">
-      <span class="quando" id="faixa-quando"></span>
-      <span class="msg" id="faixa-msg"></span>
-      <span class="resto" id="faixa-resto"></span>
-      <span class="acoes">
-        <button id="faixa-reconhecer">Reconhecer</button>
-        <button id="faixa-silenciar">Silenciar</button>
-      </span>
-    </div>
 
     <div class="faixa-sim" id="faixa-sim" hidden>
       Modo simulado — valores gerados pelo servidor, sem leitura dos equipamentos

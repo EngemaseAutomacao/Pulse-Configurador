@@ -1,5 +1,4 @@
-import { estado, esc, num, dataHora, api, MODO_DEMO, $, $$ } from '../nucleo.js';
-import { placa } from './energia.js';
+import { estado, esc, num, dataHora, api, MODO_DEMO, $, $$, placa } from '../nucleo.js';
 
 const COLUNAS = ['int16', 'uint16', 'float_ABCD', 'float_CDAB', 'float_DCBA', 'uint32'];
 const TITULOS = {
@@ -18,11 +17,13 @@ export const telaEngenharia = {
   _aoClicar: null,
   _aoMudar: null,
 
+  /** Cada tela de configuração mostra só as suas partes (`partes`). */
   montar() {
     const eqs = estado.config.equipamentos;
-    return `
+    const partes = {
+      nuvem: `
       <section class="bloco">
-        ${placa('', 'Nuvem · Engemase Pulse')}
+        ${placa('', 'Ligação com o Engemase Pulse')}
         <div class="corpo">
           <p class="nota">Liga este gateway à unidade no Engemase Pulse. No Pulse, em
             <b>Administração › Unidades › (a unidade) › Gerar token</b>, copie o token e cole aqui.
@@ -53,8 +54,8 @@ export const telaEngenharia = {
           </div>
           <div id="n-saida"></div>
         </div>
-      </section>
-
+      </section>`,
+      varredura: `
       <section class="bloco">
         ${placa('', 'Varredura do barramento')}
         <div class="corpo">
@@ -89,8 +90,8 @@ export const telaEngenharia = {
             número do escravo atrás de um gateway serial. Procurar de 1 a 16 resolve os dois casos.</p>
           <div id="v-saida"></div>
         </div>
-      </section>
-
+      </section>`,
+      terminal: `
       <section class="bloco">
         ${placa('', 'Terminal Modbus')}
         <div class="corpo">
@@ -116,8 +117,8 @@ export const telaEngenharia = {
           </div>
           <div id="t-saida"></div>
         </div>
-      </section>
-
+      </section>`,
+      diagnostico: `
       <section class="bloco">
         ${placa('', 'Diagnóstico da comunicação')}
         <div class="corpo">
@@ -127,8 +128,8 @@ export const telaEngenharia = {
           </div>
           <div id="d-saida"></div>
         </div>
-      </section>
-
+      </section>`,
+      equipamentos: `
       <section class="bloco">
         ${placa('', 'Equipamentos')}
         <div class="corpo">
@@ -143,8 +144,8 @@ export const telaEngenharia = {
           </div>
           <div id="eq-aviso"></div>
         </div>
-      </section>
-
+      </section>`,
+      secoes: `
       <section class="bloco">
         ${placa('', 'Seções da instalação')}
         <div class="corpo">
@@ -153,8 +154,8 @@ export const telaEngenharia = {
             vem do perfil do equipamento. Aplicam junto com os equipamentos, no botão acima.</p>
           <div id="sec-formulario"></div>
         </div>
-      </section>
-
+      </section>`,
+      perfis: `
       <section class="bloco">
         ${placa('', 'Perfis de equipamento')}
         <div class="corpo">
@@ -162,28 +163,37 @@ export const telaEngenharia = {
             O arquivo da unidade só aponta o perfil, o endereço e o nome do circuito.</p>
           <div id="p-saida"></div>
         </div>
-      </section>`;
+      </section>`,
+    };
+    return (this.partes || Object.keys(partes)).map((k) => partes[k]).join('\n');
   },
 
   aoMontar(raiz) {
-    const sel = $('#t-id', raiz);
-    const livre = $('#t-id-livre', raiz);
-    sel.addEventListener('change', () => { livre.hidden = sel.value !== 'livre'; });
+    const tem = (parte) => !this.partes || this.partes.includes(parte);
 
-    const tipoVarredura = $('#v-tipo', raiz);
-    tipoVarredura.addEventListener('change', () => {
-      for (const el of $$('[data-meio]', raiz)) el.hidden = el.dataset.meio !== tipoVarredura.value;
-    });
-    $('#v-rodar', raiz).addEventListener('click', () => this.varrer(raiz));
-    $('#t-ler', raiz).addEventListener('click', () => this.ler(raiz));
-    $('#t-auto', raiz).addEventListener('change', (ev) => {
-      clearInterval(this._timer);
-      if (ev.target.checked) this._timer = setInterval(() => this.ler(raiz), 2000);
-    });
-    $('#d-zerar', raiz).addEventListener('click', async () => {
-      await api('/api/eng/diagnostico/zerar', { method: 'POST', headers: { 'X-Painel': '1' } }).catch(() => {});
-      this.diagnostico(raiz);
-    });
+    if (tem('terminal')) {
+      const sel = $('#t-id', raiz);
+      const livre = $('#t-id-livre', raiz);
+      sel.addEventListener('change', () => { livre.hidden = sel.value !== 'livre'; });
+      $('#t-ler', raiz).addEventListener('click', () => this.ler(raiz));
+      $('#t-auto', raiz).addEventListener('change', (ev) => {
+        clearInterval(this._timer);
+        if (ev.target.checked) this._timer = setInterval(() => this.ler(raiz), 2000);
+      });
+    }
+    if (tem('varredura')) {
+      const tipoVarredura = $('#v-tipo', raiz);
+      tipoVarredura.addEventListener('change', () => {
+        for (const el of $$('[data-meio]', raiz)) el.hidden = el.dataset.meio !== tipoVarredura.value;
+      });
+      $('#v-rodar', raiz).addEventListener('click', () => this.varrer(raiz));
+    }
+    if (tem('diagnostico')) {
+      $('#d-zerar', raiz).addEventListener('click', async () => {
+        await api('/api/eng/diagnostico/zerar', { method: 'POST', headers: { 'X-Painel': '1' } }).catch(() => {});
+        this.diagnostico(raiz);
+      });
+    }
 
     // a raiz é a mesma a cada troca de tela: guarda os ouvintes para poder
     // removê-los, senão cada visita duplica o efeito de um clique
@@ -202,20 +212,27 @@ export const telaEngenharia = {
     };
     raiz.addEventListener('click', this._aoClicar);
     raiz.addEventListener('change', this._aoMudar);
-    $('#eq-add', raiz).addEventListener('click', () => this.acaoEquipamento(raiz, 'adicionar'));
-    $('#eq-validar', raiz).addEventListener('click', () => this.salvarEquipamentos(raiz, true));
-    $('#eq-aplicar', raiz).addEventListener('click', () => this.salvarEquipamentos(raiz, false));
-    $('#eq-desfazer', raiz).addEventListener('click', () => this.carregarEquipamentos(raiz));
-
-    $('#n-auto', raiz).addEventListener('change', () => this.marcarModulos(raiz));
-    $('#n-salvar', raiz).addEventListener('click', () => this.salvarNuvem(raiz));
-    $('#n-remover', raiz).addEventListener('click', () => this.removerNuvem(raiz));
-
-    this.diagnostico(raiz);
-    this.perfis(raiz);
-    this.carregarEquipamentos(raiz);
-    this.nuvem(raiz, true);
-    this._diag = setInterval(() => { this.diagnostico(raiz); this.nuvem(raiz, false); }, 5000);
+    if (tem('equipamentos')) {
+      $('#eq-add', raiz).addEventListener('click', () => this.acaoEquipamento(raiz, 'adicionar'));
+      $('#eq-validar', raiz).addEventListener('click', () => this.salvarEquipamentos(raiz, true));
+      $('#eq-aplicar', raiz).addEventListener('click', () => this.salvarEquipamentos(raiz, false));
+      $('#eq-desfazer', raiz).addEventListener('click', () => this.carregarEquipamentos(raiz));
+      this.carregarEquipamentos(raiz);
+    }
+    if (tem('nuvem')) {
+      $('#n-auto', raiz).addEventListener('change', () => this.marcarModulos(raiz));
+      $('#n-salvar', raiz).addEventListener('click', () => this.salvarNuvem(raiz));
+      $('#n-remover', raiz).addEventListener('click', () => this.removerNuvem(raiz));
+      this.nuvem(raiz, true);
+    }
+    if (tem('perfis')) this.perfis(raiz);
+    if (tem('diagnostico')) this.diagnostico(raiz);
+    if (tem('diagnostico') || tem('nuvem')) {
+      this._diag = setInterval(() => {
+        if (tem('diagnostico')) this.diagnostico(raiz);
+        if (tem('nuvem')) this.nuvem(raiz, false);
+      }, 5000);
+    }
   },
 
   /* ------------------------------------------------------------------ nuvem */
@@ -773,5 +790,24 @@ export const telaEngenharia = {
     this._aoMudar = null;
   },
 };
+
+/*
+ * As telas de configuração do menu: o mesmo código, cada uma com as suas partes.
+ * Object.create mantém os métodos da Engenharia e dá a cada tela o próprio estado.
+ */
+const telaDe = (extra) => Object.assign(Object.create(telaEngenharia),
+  { _timer: null, _diag: null, _raiz: null, _aoClicar: null, _aoMudar: null }, extra);
+
+export const telaEquipamentos = telaDe({
+  id: 'equipamentos', nome: 'Equipamentos', titulo: 'Equipamentos',
+  partes: ['equipamentos', 'secoes', 'perfis'],
+});
+export const telaNuvem = telaDe({
+  id: 'nuvem', nome: 'Nuvem', titulo: 'Nuvem · Engemase Pulse', partes: ['nuvem'],
+});
+export const telaComunicacao = telaDe({
+  id: 'comunicacao', nome: 'Comunicação', titulo: 'Comunicação',
+  partes: ['diagnostico', 'varredura', 'terminal'],
+});
 
 export const _eng = { MODO_DEMO, $$ };

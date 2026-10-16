@@ -539,8 +539,7 @@ console.log('\nCasca da interface e cache');
 
   // todo id que o código busca precisa existir na página: se faltar um, a
   // interface morre inteira em "Cannot set properties of null"
-  const arquivos = ['public/assets/app.js', 'public/assets/telas/energia.js',
-    'public/assets/telas/unifilar.js'];
+  const arquivos = ['public/assets/app.js'];
   const faltando = [];
   for (const arq of arquivos) {
     const fonte = fs.readFileSync(path.join(raiz, arq), 'utf8');
@@ -565,40 +564,27 @@ console.log('\nCasca da interface e cache');
 }
 
 
-console.log('\nTelas sem equipamento (estado vazio)');
+console.log('\nTelas do configurador (só configuração)');
 {
-  // as telas de Energia e Unifilar não somem numa instalação recém-criada:
-  // elas precisam montar e explicar o que falta
+  // as leituras, gráficos e alarmes ficam no Engemase Pulse; o configurador
+  // tem só as telas de configuração do gateway
   const fonteApp = fs.readFileSync(path.join(raiz, 'public/assets/app.js'), 'utf8');
-  // só a linha do EXIGE_GRUPO decide o que some do menu; GRUPO_DA_TELA é outra coisa
-  const exigeGrupo = (fonteApp.match(/const EXIGE_GRUPO = \{[^}]*\}/) || [''])[0];
-  const exigeSecao = (fonteApp.match(/const EXIGE_SECAO = \{[^}]*\}/) || [''])[0];
-  ok('Energia não é escondida por falta de medidor', !/energia:/.test(exigeGrupo), exigeGrupo);
-  ok('Unifilar não é escondido por falta de medidor',
-    !/unifilar:/.test(exigeGrupo) && !/unifilar:/.test(exigeSecao), exigeSecao);
-  ok('Água ainda depende do reservatório', /agua:\s*'caixa_agua'/.test(exigeSecao));
-  ok('a configuração pode forçar uma tela no menu', /pedido\[t\.id\] === true/.test(fonteApp));
-  ok('a configuração pode esconder uma tela', /pedido\[t\.id\] === false/.test(fonteApp));
-  ok('o pedido da instalação vem antes da regra automática',
-    fonteApp.indexOf('pedido[t.id] === true') < fonteApp.indexOf('EXIGE_GRUPO[t.id]'));
-  ok('o servidor manda a lista de telas para o painel',
-    /telas: config\.telas \|\| \{\}/.test(fs.readFileSync(path.join(raiz, 'server.js'), 'utf8')));
-
-  const gerador = fs.readFileSync(path.join(raiz, 'public/assets/telas/gerador.js'), 'utf8');
-  ok('Gerador monta o guia quando ainda não há grupo', /if \(!cfg \|\| !eq\) return estadoVazio/.test(gerador));
-  ok('Gerador não desenha tendência no estado vazio', /!\$\('#gmg-grafico', raiz\)\) return/.test(gerador));
-  ok('a atualização por varredura sai cedo sem gerador', /if \(!cfg\?\.medidor\) return;/.test(gerador));
-  for (const arq of ['config.protecao.json', 'config.fx3u.json']) {
-    const c = JSON.parse(fs.readFileSync(path.join(raiz, arq), 'utf8'));
-    ok(`${arq}: a bancada mostra a tela do gerador`, c.telas?.gerador === true);
+  ok('o menu tem só as telas de configuração',
+    /const CATALOGO = \[telaInicio, telaEquipamentos, telaNuvem, telaComunicacao, telaUsuarios\]/.test(fonteApp));
+  ok('nenhuma tela de leitura volta ao configurador',
+    !/telaEnergia|telaUnifilar|telaGerador|telaHistorico|telaAlarmes|telaConsumo/.test(fonteApp));
+  ok('sem sirene local: os avisos são do Pulse', !/AudioContext|INTERVALO_SIRENE/.test(fonteApp));
+  ok('quem não configura recebe o aviso do Pulse', /operador não configura nada/.test(fonteApp));
+  const eng = fs.readFileSync(path.join(raiz, 'public/assets/telas/engenharia.js'), 'utf8');
+  ok('a Engenharia virou telas com partes', /telaDe\(/.test(eng) && /partes: \['nuvem'\]/.test(eng)
+    && /partes: \['equipamentos', 'secoes', 'perfis'\]/.test(eng) && /partes: \['diagnostico', 'varredura', 'terminal'\]/.test(eng));
+  ok('cada parte só liga os seus botões', /if \(tem\('terminal'\)\)/.test(eng) && /if \(tem\('nuvem'\)\)/.test(eng));
+  const inicio = fs.readFileSync(path.join(raiz, 'public/assets/telas/inicio.js'), 'utf8');
+  ok('o Início não mostra valor medido, só a situação',
+    !/valor\(|data-tag=/.test(inicio) && /online/.test(inicio) && /\/api\/eng\/nuvem/.test(inicio));
+  for (const nome of ['energia', 'unifilar', 'consumo', 'agua', 'gerador', 'historico', 'alarmes', 'comandos', 'indicadores']) {
+    ok(`telas/${nome}.js saiu do configurador`, !fs.existsSync(path.join(raiz, 'public/assets/telas', `${nome}.js`)));
   }
-
-  const energia = fs.readFileSync(path.join(raiz, 'public/assets/telas/energia.js'), 'utf8');
-  const unifilar = fs.readFileSync(path.join(raiz, 'public/assets/telas/unifilar.js'), 'utf8');
-  ok('Energia trata a lista vazia antes de usar o principal',
-    energia.indexOf('if (!eqs.length)') < energia.indexOf('eqs.find((e) => e.principal)'));
-  ok('Unifilar trata a falta de seção antes de ler as saídas',
-    unifilar.indexOf('if (!u || !temEnergia)') < unifilar.indexOf('(u.saidas || [])'));
 }
 
 console.log('\nEditor de equipamentos');
@@ -616,26 +602,9 @@ console.log('\nEditor de equipamentos');
 }
 
 
-console.log('\nDesenhos e tipografia');
+console.log('\nTipografia');
 {
   const css = fs.readFileSync(path.join(raiz, 'public/assets/estilo.css'), 'utf8');
-
-  // a parede do tanque não pode ter preenchimento, senão cobre o líquido.
-  // Atributo fill="none" no elemento perde para a regra .caixa do CSS.
-  ok('existe classe de parede sem preenchimento', /\.desenho \.parede \{[^}]*fill:\s*none/.test(css));
-  for (const arq of ['public/assets/telas/agua.js', 'public/assets/telas/gerador.js']) {
-    const fonte = fs.readFileSync(path.join(raiz, arq), 'utf8');
-    ok(`${path.basename(arq)}: tanque usa parede, não caixa`,
-      !/class="caixa"[^>]*fill="none"/.test(fonte) && /class="parede"/.test(fonte));
-  }
-
-  // span é inline: sem display block, a barra de fase fica com altura zero
-  ok('barra de fase é bloco', /\.barra-fase \.fill \{[^}]*display:\s*block/.test(css));
-  ok('trilho da fase é bloco', /\.barra-fase \.trilho \{[^}]*display:\s*block/.test(css));
-
-  // ".marca" é a logomarca da coluna; as marcas de limite têm nome próprio
-  ok('marcas de limite não colidem com a logomarca',
-    /\.escala \.limite \{/.test(css) && !/\.escala \.marca \{/.test(css));
 
   // fontes servidas da própria máquina, nunca de CDN
   ok('fontes são declaradas localmente', (css.match(/@font-face/g) || []).length >= 4);
@@ -782,27 +751,6 @@ console.log('\nComandos: senha no momento do acionamento');
     /status === 401 && dados\.sessao !== 'valida'/.test(nucleo));
   ok('o corpo da resposta é lido antes de decidir pelo login',
     nucleo.indexOf('await r.json()') < nucleo.indexOf("status === 401"));
-
-  const tela = fs.readFileSync(path.join(raiz, 'public/assets/telas/comandos.js'), 'utf8');
-  ok('a tela pede a senha antes de habilitar o envio', /exige_senha && !senha/.test(tela));
-  ok('a senha digitada sobrevive ao redesenho de 2 s', /senhaEmDigitacao/.test(tela));
-  ok('a senha não fica no DOM depois do envio',
-    /campo\.value = ''|senha = ''/.test(tela) || /value = ''/.test(tela));
-  ok('o campo de senha é do tipo password', /type="password"/.test(tela));
-}
-
-console.log('\nComandos nas telas de Energia e Unifilar');
-{
-  const energia = fs.readFileSync(path.join(raiz, 'public/assets/telas/energia.js'), 'utf8');
-  const unifilar = fs.readFileSync(path.join(raiz, 'public/assets/telas/unifilar.js'), 'utf8');
-  ok('Energia traz o bloco de acionamento', /blocoComandos\(/.test(energia));
-  ok('Unifilar traz o bloco de acionamento', /blocoComandos\(/.test(unifilar));
-  for (const [nome, fonte] of [['Energia', energia], ['Unifilar', unifilar]]) {
-    ok(`${nome} esconde o bloco quando a instalação não liberou comandos`,
-      /comandos_liberados \?/.test(fonte));
-      ok(`${nome} liga o comportamento do bloco ao montar`, /comandos\.aoMontar\(raiz\)/.test(fonte));
-    ok(`${nome} desliga o bloco ao sair`, /comandos\.destruir\(\)/.test(fonte));
-  }
 }
 
 console.log('\nAtalhos de teclado');
@@ -1274,51 +1222,19 @@ console.log('\nGerador: superfície da tela e do servidor');
     /gerador\?\.medidor\) return res\.status\(404\)/.test(fonte));
   ok('o motor é refeito quando a configuração é aplicada',
     (fonte.match(/new MotorGerador\(/g) || []).length === 2);
-
-  const tela = fs.readFileSync(path.join(raiz, 'public/assets/telas/indicadores.js'), 'utf8');
-  ok('a tela não recalcula indicador no navegador', !/reduce\(\(s, c\) => s \+ c\.duracao/.test(tela));
-  ok('o modo demonstração tem números próprios', /MODO_DEMO[\s\S]{0,80}simuladosDemo\(/.test(tela));
-  ok('o histórico é recarregado por tempo, não a cada varredura', /setInterval[\s\S]{0,60}30000/.test(tela));
-  ok('a tela do gerador monta e desmonta os indicadores',
-    /indicadores\.aoMontar\(raiz\)/.test(fs.readFileSync(path.join(raiz, 'public/assets/telas/gerador.js'), 'utf8'))
-    && /indicadores\.destruir\(\)/.test(fs.readFileSync(path.join(raiz, 'public/assets/telas/gerador.js'), 'utf8')));
-  ok('o gerador de demonstração inclui o módulo de indicadores',
-    /telas\/indicadores\.js/.test(fs.readFileSync(path.join(raiz, 'tools/gerar-demo.js'), 'utf8')));
 }
 
-console.log('\nAcionamento: um clique não pode virar dois');
+console.log('\nTelas que ligam ouvintes na raiz');
 {
-  const tela = fs.readFileSync(path.join(raiz, 'public/assets/telas/comandos.js'), 'utf8');
-  ok('os ouvintes são guardados para poder remover', /this\._aoClicar = \(ev\)/.test(tela));
-  ok('montar de novo desliga o que estava ligado', /aoMontar\(raiz[^)]*\) \{\s*\n\s*this\.destruir\(\);/.test(tela));
-  ok('sair da tela remove clique e teclado',
-    /destruir\(\)[\s\S]{0,400}removeEventListener\('click'[\s\S]{0,120}removeEventListener\('keydown'/.test(tela));
-  ok('existe espera mínima entre armar e confirmar', /const ESPERA_MINIMA = \d+;/.test(tela));
-  ok('confirmação cedo demais é ignorada',
-    /agora - this\._armado\.desde < ESPERA_MINIMA\) return;/.test(tela));
-  ok('a espera mínima vem antes de qualquer escrita',
-    tela.indexOf('ESPERA_MINIMA) return;') < tela.indexOf('this.executar(raiz'));
-
-  // o mesmo vazamento existia nas outras telas que ligam ouvintes na raiz
-  for (const arquivo of ['engenharia.js', 'usuarios.js', 'alarmes.js']) {
+  // a raiz é a mesma a cada troca de tela: ouvinte que não sai acumula, e um
+  // clique passa a valer por dois (foi assim que um disjuntor abriu sem
+  // confirmação, quando o acionamento ainda estava nesta interface)
+  for (const arquivo of ['engenharia.js', 'usuarios.js', 'inicio.js']) {
     const fonte = fs.readFileSync(path.join(raiz, 'public/assets/telas', arquivo), 'utf8');
     const ligaNaRaiz = /raiz\.addEventListener/.test(fonte);
     ok(`${arquivo}: ouvinte da raiz é removido ao sair`,
       !ligaNaRaiz || /removeEventListener/.test(fonte));
   }
-}
-
-console.log('\nSirene do anunciador');
-{
-  const app = fs.readFileSync(path.join(raiz, 'public/assets/app.js'), 'utf8');
-  ok('a sirene repete enquanto houver alarme pendente', /INTERVALO_SIRENE/.test(app));
-  ok('silenciar guarda o conjunto silenciado', /silenciadoEm/.test(app));
-  ok('alarme novo volta a soar',
-    /chave !== som\.silenciadoEm && som\.silenciadoEm/.test(app));
-  ok('a sirene não depende de chegar pacote novo',
-    /setInterval[\s\S]{0,240}atualizarSirene/.test(app));
-  ok('reconhecido deixa de ser pendente', /filter\(\(a\) => !a\.reconhecido\)/.test(app));
-  ok('o contexto de áudio é retomado quando a aba volta', /state === 'suspended'/.test(app));
 }
 
 console.log('\nVarredura de endereços: pausa da leitura');
@@ -2055,14 +1971,6 @@ console.log('\nConsumo de energia hora a hora');
   const srv = fs.readFileSync(path.join(raiz, 'server.js'), 'utf8');
   ok('rota /api/consumo exige sessão', /app\.get\('\/api\/consumo', exigir\('operador'\)/.test(srv));
   ok('consolidação periódica e na partida', /setInterval\(consolidarConsumo/.test(srv) && /setTimeout\(consolidarConsumo/.test(srv));
-  const app = fs.readFileSync(path.join(raiz, 'public/assets/app.js'), 'utf8');
-  ok('tela Consumo no menu, depois do Unifilar', /telaUnifilar, telaConsumo/.test(app));
-
-  globalThis.window ??= { DEMO_EMBUTIDO: false, addEventListener() {} };
-  globalThis.location ??= { search: '', protocol: 'http:', host: 'x' };
-  const { _consumoInterno: ci } = await import('../public/assets/telas/consumo.js');
-  ok('fim de escala redondo', ci.consEscalaRedonda(37) === 50 && ci.consEscalaRedonda(180) === 200 && ci.consEscalaRedonda(0.7) === 1);
-  ok('coluna de altura zero não desenha nada', ci.consColuna(0, 100, 10, 100) === '');
 }
 
 console.log('\nSessão encerrada fecha o tempo real');
@@ -2111,13 +2019,10 @@ console.log('\nInstalação no Linux');
     ok('config.planta.json: alarmes "sem consumo" usam {nome}',
       plantaN.alarmes.filter((a) => /sem consumo/.test(a.mensagem)).every((a) => a.mensagem.startsWith('{nome}')));
   }
-  const histJs = fs.readFileSync(path.join(raiz, 'public/assets/telas/historico.js'), 'utf8');
-  ok('histórico lista grandeza sem unidade (fator de potência), não só as com unidade',
-    /filter\(\(t\) => !t\.digital && !t\.enum && \(t\.unidade !== '' \|\| !t\.oculto\)\)/.test(histJs));
   const alarmesHtml = fs.readFileSync(path.join(raiz, 'central/publico/alarmes.html'), 'utf8');
   ok('central: tela de alarmes servida e copiada para a VM',
     /'\/alarmes': 'alarmes\.html'/.test(centralJs) && /publico\/"\*\.html/.test(fs.readFileSync(path.join(raiz, 'central/montar-vm.sh'), 'utf8')));
-  ok('alarmes: "Abrir configurador" leva direto à tela de alarmes da loja', /#alarmes`/.test(alarmesHtml));
+  ok('alarmes: "Abrir configurador" abre a situação do gateway', /#inicio`/.test(alarmesHtml));
   ok('alarmes: loja sem contato também vira alarme', /Loja sem comunicação com a central/.test(alarmesHtml));
   ok('alarmes: lista só redesenha quando muda (clique não se perde)', /assinatura === alvo\.dataset\.assinatura/.test(alarmesHtml));
   const loginJs = fs.readFileSync(path.join(raiz, 'public/assets/login.js'), 'utf8');
@@ -2209,8 +2114,9 @@ console.log('\nInstalação no Linux');
   ok('logos liberados sem login, só imagem da pasta marcas', /assets\\\/marcas\\\/\[\\w-\]\+\\\.\(svg\|png\|webp\)/.test(srvC));
   const idx = fs.readFileSync(path.join(raiz, 'public/index.html'), 'utf8');
   const lgn = fs.readFileSync(path.join(raiz, 'public/login.html'), 'utf8');
-  ok('logo do cliente no cabeçalho e da Engemase no rodapé',
-    /data-marca="cliente"/.test(idx) && /data-marca="engemase"/.test(idx) && /data-marca="cliente"/.test(lgn) && /data-marca="engemase"/.test(lgn));
+  ok('sem logo do cliente (ele acessa o Engemase Pulse); Engemase no topo e no rodapé',
+    !/data-marca="cliente"/.test(idx + lgn) && /data-marca="engemase"/.test(idx) && /data-marca="engemase"/.test(lgn)
+    && /data-marca="engemase-simbolo"/.test(idx) && /data-marca="engemase-simbolo"/.test(lgn));
   ok('index.html e login.html sem acentuação corrompida', !/Ã/.test(idx + lgn) && /Supervisório/.test(idx));
 
   // LINUX.md promete 2 equipamentos na COM3 e 10 na COM4 para o sed das portas
@@ -2639,15 +2545,10 @@ console.log('\nIdentidade Engemase Pulse e tela da nuvem');
   const css = fs.readFileSync(path.join(raiz, 'public/assets/estilo.css'), 'utf8');
   ok('tema escuro definido por variáveis', /:root\[data-tema="escuro"\]\s*\{[^}]*--tela:/.test(css));
   ok('o grafite antigo não sobrou no estilo', !/--grafite/.test(css));
-  const graf = fs.readFileSync(path.join(raiz, 'public/assets/grafico.js'), 'utf8');
-  ok('gráficos pegam as cores do tema', /getComputedStyle/.test(graf) && !/'#e8eae5'/.test(graf));
   const eng = fs.readFileSync(path.join(raiz, 'public/assets/telas/engenharia.js'), 'utf8');
-  ok('Engenharia tem o cartão da nuvem', /api\('\/api\/eng\/nuvem'\)/.test(eng) && /\/api\/eng\/nuvem\/remover/.test(eng));
+  ok('a tela Nuvem tem o cartão da ligação', /api\('\/api\/eng\/nuvem'\)/.test(eng) && /\/api\/eng\/nuvem\/remover/.test(eng));
   ok('o campo do token é de senha e nunca é preenchido pela tela',
     /id="n-token" type="password"/.test(eng) && !/#n-token', raiz\)\.value = r\./.test(eng));
-  ok('demo leva o tema e o símbolo embutidos',
-    /assets\/tema\.js/.test(fs.readFileSync(path.join(raiz, 'tools/gerar-demo.js'), 'utf8'))
-    && /'engemase-simbolo'/.test(fs.readFileSync(path.join(raiz, 'tools/gerar-demo.js'), 'utf8')));
 }
 
 console.log(`\n${passou} passaram, ${falhou} falharam\n`);

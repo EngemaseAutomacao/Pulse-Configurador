@@ -232,7 +232,7 @@
         b.addEventListener('click', () => { vistos.add(chave(a)); guardar('central-alarmes-vistos', JSON.stringify([...vistos])); desenhar(ultimo); });
         acoes.append(b);
       }
-      acoes.append(el('a', { className: 'botao', href: `${a.painel}#alarmes`, target: '_blank', rel: 'noopener', textContent: 'Abrir configurador' }));
+      acoes.append(el('a', { className: 'botao', href: `${a.painel}#inicio`, target: '_blank', rel: 'noopener', textContent: 'Abrir configurador' }));
       alvo.append(el('article', { className: `alarme ${a.prioridade}${novo ? ' novo' : ''}` },
         el('div', { className: 'prio' }, el('i', { textContent: icone, ariaHidden: 'true' }), rot),
         el('div', {}, el('div', { className: 'loja', textContent: a.nomeLoja }),

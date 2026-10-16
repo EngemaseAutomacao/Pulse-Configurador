@@ -1,5 +1,4 @@
-import { estado, esc, dataHora, api, $ } from '../nucleo.js';
-import { placa } from './energia.js';
+import { estado, esc, dataHora, api, $, placa } from '../nucleo.js';
 
 const DESCRICAO_PAPEIS = {
   operador: 'vê as telas e reconhece alarme',

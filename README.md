@@ -13,62 +13,34 @@ navegador  ←HTTP/WebSocket→  servidor Node  ←RS-485 Modbus RTU→  9× SMA
 
 ## Telas
 
-| Tela | Tag | O que mostra |
+O configurador é a ferramenta da equipe técnica no gateway. **As leituras, os gráficos,
+os alarmes (com aviso no celular, e-mail e Telegram), o consumo e os relatórios ficam no
+Engemase Pulse**, na nuvem — é lá que o cliente acompanha a unidade.
+
+| Tela | Quem vê | O que faz |
 |---|---|---|
-| Energia | QGBT-01 | entrada geral e os 8 alimentadores, com corrente por fase e carga sobre o disjuntor |
-| Unifilar | QGBT-01 | rede, grupo gerador, chave de transferência e barramento, com corrente ao vivo |
-| Água | TQ-01 | reservatório em corte, nível, volume, bomba de recalque e tendência |
-| Gerador | GMG-01 | estado do grupo, parâmetros do motor, tanque de diesel, **bateria e arranque**, **indicadores do período**, últimas partidas e anunciador de falhas |
-| Histórico | — | tendência de qualquer grandeza, com as linhas de limite desenhadas |
-| Alarmes | — | ativos, reconhecimento e ocorrências recentes |
+| Início | técnico | situação do gateway: equipamentos respondendo, envio para o Pulse e alarmes ativos (sem valores medidos) |
+| Equipamentos | técnico | cadastro dos equipamentos (perfil, endereço, meio, entrada geral, disjuntor), seções da instalação (tanque, reservatório, bateria) e perfis |
+| Nuvem | técnico | ligação com o Engemase Pulse: endereço, token e módulos; mostra se está enviando — ver [NUVEM.md](NUVEM.md) |
+| Comunicação | técnico | diagnóstico por equipamento, varredura do barramento e terminal Modbus |
+| Usuários | admin | contas de acesso e trilha de auditoria |
 
-Água e Gerador só entram no menu quando existem na instalação — loja sem reservatório
-não precisa de tela de reservatório. Na hora de instalar é o contrário: o técnico quer a
-tela antes do equipamento. Para isso, a configuração manda em cima da regra automática:
-
-```jsonc
-"telas": { "gerador": true }   // aparece sempre, com o guia de instalação
-"telas": { "agua": false }     // some, mesmo havendo reservatório
-```
-
-Energia e Unifilar aparecem sempre. As teclas **1 a 8** trocam de tela (e são ignoradas
-enquanto você digita em algum campo). A URL guarda a tela aberta (`#gerador`), o que permite
-deixar um monitor de parede fixo em uma delas.
+Quem entra com papel de operador vê só o aviso de que a unidade se acompanha no Pulse.
+Sem internet, o gateway continua lendo, gravando e calculando alarmes; tudo sobe para o
+Pulse quando a conexão volta. Para manutenção no local, a tela **Comunicação** mostra se
+cada equipamento responde e os valores brutos dos registradores.
 
 ## A interface
 
-A identidade é a mesma do **Engemase Pulse** (a nuvem): logo e azul da Engemase,
-superfícies neutras, cartões arredondados, menu com ícones e **tema claro, escuro ou
-automático** (segue o aparelho; o botão "Tema" no rodapé do menu troca, e a escolha fica
-no navegador).
+A identidade é a mesma do **Engemase Pulse**: logo e azul da Engemase, superfícies
+neutras, cartões arredondados, menu com ícones e **tema claro, escuro ou automático**
+(segue o aparelho; o botão "Tema" no rodapé do menu troca, e a escolha fica no navegador).
+O cliente não acessa o configurador, então não há logo de cliente aqui.
 
-Por baixo, o desenho continua seguindo a lógica de **HMI de alto desempenho (ISA-101)**:
-em operação normal a tela é neutra; vermelho e âmbar aparecem **apenas** quando algo sai
-do esperado, e o azul da marca fica só na moldura (menu, botões, seleção), nunca nos
-valores do processo. O operador aprende que cor significa problema, e enxerga uma
-anormalidade do outro lado da sala sem ler número nenhum.
-
-A tipografia viaja com o produto, sem CDN: **Sora** nos títulos e **Manrope** no corpo
-e nos valores, as mesmas do Pulse. Os números usam **dígitos tabulares** em vez de fonte
-monoespaçada: alinham na coluna sem o aspecto rígido de terminal.
-
-Outras decisões deliberadas:
-
-- **Tag ISA** no título de cada cartão (QGBT-01, TQ-01, GMG-01) — a mesma nomenclatura
-  da porta do painel e do projeto elétrico.
-- **Cores de fase conforme ABNT**: marrom, preto e cinza para I1, I2 e I3; azul no neutro.
-- **Anunciador de falhas** do gerador reproduzindo o painel físico, inclusive a marcação de
-  **primeira falha** (a janela que acendeu primeiro fica com "1ª"), que é o que interessa
-  na hora de achar a causa raiz de um desarme em cascata.
-- **Reservatório e tanque desenhados em corte**, com linha de cota e marcas de limite, no
-  estilo de desenho técnico — não como um medidor decorativo.
-- Títulos em tipografia condensada e **dígitos tabulares** em todo número, para os valores
-  não dançarem na tela a cada atualização.
-- Nenhuma fonte, ícone ou biblioteca externa: a interface inteira carrega da própria
-  máquina, o que é obrigatório em rede isolada.
-- **Teclas 1 a 9 trocam de tela**, para operação com teclado ou painel de bancada.
-  O atalho é ignorado enquanto o cursor está em qualquer campo — endereço Modbus,
-  nome de equipamento ou senha de comando não trocam a tela por baixo do operador.
+A tipografia viaja com o produto, sem CDN: **Sora** nos títulos e **Manrope** no corpo,
+as mesmas do Pulse. Nenhuma fonte, ícone ou biblioteca externa: a interface inteira carrega
+da própria máquina, o que é obrigatório em rede isolada. As teclas **1 a 5** trocam de
+tela (e são ignoradas enquanto você digita em algum campo).
 
 ## Instalação
 
@@ -104,14 +76,8 @@ de primeira falha, reconhecimento e normalização.
 Para simular sem encenação (comissionamento, teste de campo), use
 `node server.js --sem-modbus` sem a opção `--roteiro`.
 
-O arquivo `public/demo.html` é a mesma interface empacotada em arquivo único, com o
-simulador embutido: abre com dois cliques em qualquer máquina, sem servidor e sem rede.
-Ele é gerado como script clássico e sem nenhum recurso externo justamente para funcionar
-no protocolo `file://`, onde módulos ES e `history.replaceState` são bloqueados.
-
-> `public/index.html` é o contrário: precisa do servidor no ar, porque busca
-> `/api/config` e o WebSocket. Abrir esse arquivo direto do disco não funciona —
-> para demonstrar sem servidor, use o `demo.html`.
+Com a ligação da nuvem feita para uma unidade **de teste** do Pulse, a simulação aparece
+lá como se fosse uma unidade real — é assim que se demonstra o produto sem hardware.
 
 ## Cadastrar equipamentos pela tela
 
@@ -150,11 +116,8 @@ de 0 a 100 % e sempre amarra a seção ao equipamento cadastrado. Removeu o equi
 a seção some junto.
 
 Ou seja: **para acrescentar o gerador a uma loja não é preciso editar JSON nenhum** —
-cadastra o equipamento com o perfil da marca, preenche tanque e consumo, aplica, e a
-tela de Gerador passa a funcionar com desenho, anunciador e indicadores.
-
-Enquanto nenhum medidor de energia estiver cadastrado, as telas de Energia e
-Unifilar continuam no menu mostrando esse roteiro — elas não somem.
+cadastra o equipamento com o perfil da marca, preenche tanque e consumo, aplica, e o
+módulo Gerador aparece no Engemase Pulse no envio seguinte.
 
 ## Várias instalações no mesmo servidor
 
@@ -410,24 +373,18 @@ Três tipos de regra:
 - `digital` com `"inverso": true` alarma quando o bit **desliga** (ex.: bomba fora do automático).
 - Quando um equipamento perde comunicação, só o alarme de comunicação abre — as regras de
   processo daquele equipamento ficam suspensas, em vez de disparar tudo de uma vez.
-### Sirene, silenciar e reconhecer
-
-A sequência é a de um anunciador de painel, e não um bipe solto:
-
-| Ação | O que acontece |
-|---|---|
-| Alarme entra | a faixa pulsa e a sirene **repete** (3 s em alarme alto, 9 s em médio) |
-| **Silenciar** | cala a sirene daquele conjunto; o visual continua chamando |
-| Alarme **novo** entra | o conjunto mudou, então a sirene **volta a tocar** |
-| **Reconhecer** | a faixa recua para aviso discreto e a sirene cala |
-| Condição normaliza | o alarme sai sozinho, reconhecido ou não |
-
-Silenciar nunca desarma o anunciador para o resto do turno: é por ocorrência.
-O botão **Som** da coluna é a chave do posto, essa sim permanente.
+Os alarmes são detectados aqui (limites, atraso e banda morta) e vão para o Engemase
+Pulse junto com as leituras, onde avisam no celular, por e-mail e Telegram, e são
+reconhecidos. O reconhecimento feito no Pulse volta para o gateway. Não há sirene local.
 
 ## Acionamento
 
-O bloco **Acionamento** fica nas telas de **Energia** e de **Unifilar**.
+A tela de acionamento saiu do configurador junto com as telas de leitura: comando
+remoto vai para o Engemase Pulse em um projeto próprio de segurança. O motor de comandos
+continua no servidor, desligado enquanto a instalação não tiver
+`seguranca.comandos_liberados: true`, e as regras abaixo valem para quando a tela voltar
+no Pulse (inclusive a lição dos dois toques: a tela antiga acumulava ouvintes de clique a
+cada troca de tela, e um clique chegou a valer por dois).
 
 Comandos de saída (ligar e desligar disjuntor, por exemplo) são declarados no
 perfil do equipamento e passam por sete camadas antes de escrever:
@@ -599,10 +556,9 @@ public/assets/estilo.css      identidade visual
 public/assets/fontes/         Manrope e Sora (SIL OFL), servidas localmente
 public/assets/tema.js         tema claro/escuro/automático, antes de desenhar a página
 public/assets/nucleo.js       estado, vínculos de dados e conexão
-public/assets/grafico.js      gráfico de tendência em canvas
-public/assets/telas/*.js      uma tela por arquivo
-public/demo.html              demonstração autocontida, abre sem servidor
-tools/gerar-demo.js           empacota a interface em arquivo único
+public/assets/telas/inicio.js situação do gateway
+public/assets/telas/engenharia.js  Equipamentos, Nuvem e Comunicação (mesmo código, partes diferentes)
+public/assets/telas/usuarios.js    contas e auditoria
 tools/orcamento.js            estimativa de tempo da RS-485
 tools/semear-gerador.js       histórico de gerador para demonstração
 testes/                       bateria de testes
