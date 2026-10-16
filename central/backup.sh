@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# Backup das chaves da VPN, do cadastro de lojas e da lista de acessos da
-# central (cron diário, 3h30).
+# Backup das chaves e do cadastro da VPN (cron diário, 3h30).
 # Fica em /home/<usuário>/backup-central/ — baixe de vez em quando para fora da nuvem:
 #   scp ubuntu@<IP>:backup-central/central-*.tgz .
-# Com este arquivo e o pacote do projeto, a central volta em outra VM sem
-# precisar reconfigurar nenhuma loja (as chaves são as mesmas).
+# Com este arquivo e o pacote do projeto, a VPN volta em outra VM sem precisar
+# reconfigurar nenhum gateway nem técnico (as chaves são as mesmas).
 set -euo pipefail
 # o usuário com que se entra por SSH: "ubuntu" na imagem da Oracle (que também
 # tem um "opc" com uid 1000); em outra imagem, o primeiro usuário comum
@@ -17,13 +16,7 @@ fi
 dir="/home/$dono/backup-central"
 mkdir -p "$dir"
 arq="$dir/central-$(date +%Y%m%d).tgz"
-# só o que existe: sem o acesso web ligado não há lista de e-mails nem oauth2-proxy
-itens=""
-for p in etc/wireguard opt/central/lojas.json opt/central/web.json opt/central/acesso etc/oauth2-proxy; do
-  if [ -e "/$p" ]; then itens="$itens $p"; fi
-done
-# shellcheck disable=SC2086  # caminhos fixos, sem espaço
-tar -czf "$arq" -C / $itens
+tar -czf "$arq" -C / etc/wireguard
 chown -R "$dono:" "$dir"
 chmod 700 "$dir"
 chmod 600 "$dir"/*.tgz

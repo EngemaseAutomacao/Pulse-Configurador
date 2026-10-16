@@ -13,7 +13,8 @@ configurador ── HTTPS, só de saída, a cada 10 s ──▶   POST /api/inge
 ```
 
 * **Nenhuma porta aberta na unidade** e nenhuma VPN para os dados: o gateway é que chama a nuvem.
-  A VPN da central continua servindo para manutenção (SSH, engenharia).
+  A VPN de manutenção ([CENTRAL.md](CENTRAL.md)) continua servindo para SSH e para o
+  configurador; o endereço de cada gateway nela aparece na administração do Pulse.
 * **Internet caiu:** a unidade segue normal; quando a conexão volta, o atraso sobe em lotes.
 * **Os medidores nascem sozinhos na nuvem**, a partir dos equipamentos do grupo `energia`:
   nome, TAG ISA, entrada geral (`principal`), disjuntor (`limites.corrente_a.max`) e endereço.

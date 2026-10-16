@@ -244,29 +244,31 @@ Cuidados próprios de placa:
 * **Senha padrão**: imagem Armbian/Raspberry vem com usuário e senha conhecidos. Troque
   antes de qualquer outra coisa (`passwd`) — é o primeiro que um invasor tenta.
 
-## Instalar sem ir até a loja
+## Instalar sem ir até a unidade
 
-Só é preciso **alguém na loja uma vez**, para ligar a placa na rede com internet — ou um
+Só é preciso **alguém na unidade uma vez**, para ligar a placa na rede com internet — ou um
 acesso remoto que já exista (SSH, AnyDesk/TeamViewer num computador da mesma rede). A
-partir do momento em que a placa entra na VPN da central, todo o resto é remoto.
+partir do momento em que a placa entra na VPN de manutenção ([CENTRAL.md](CENTRAL.md)),
+todo o resto é remoto.
 
-1. **Na central** (VM): `sudo bash /opt/central/vpn-novo.sh loja e02 "Nome da loja"` —
-   gera o `loja-e02.conf` e mostra o endereço da loja na VPN (ex.: `10.88.1.2`).
-2. **Levar dois arquivos até a placa** — o `painel.tgz` e o `loja-e02.conf`:
+1. **Na central** (VM): `sudo bash /opt/central/vpn-novo.sh unidade e02 "Nome da unidade"` —
+   gera o `unidade-e02.conf` e mostra o endereço do gateway na VPN (ex.: `10.88.1.2`).
+2. **Levar dois arquivos até a placa** — o `painel.tgz` e o `unidade-e02.conf`:
    * com acesso remoto que já exista: `scp` por ele;
-   * sem nenhum acesso: num pendrive, com quem estiver na loja.
-3. **Na placa** (pelo acesso remoto, ou quem estiver na loja digita):
+   * sem nenhum acesso: num pendrive, com quem estiver na unidade.
+3. **Na placa** (pelo acesso remoto, ou quem estiver na unidade digita):
    ```bash
-   mkdir -p ~/painel && tar -xzf ~/painel.tgz -C ~/painel && cd ~/painel && sudo bash tools/instalar-linux.sh config.planta.json --vpn ~/loja-e02.conf
+   mkdir -p ~/painel && tar -xzf ~/painel.tgz -C ~/painel && cd ~/painel && sudo bash tools/instalar-linux.sh config.planta.json --vpn ~/unidade-e02.conf
    ```
 4. **Daqui em diante, tudo pela VPN**, do seu PC com o túnel do WireGuard ativo:
    ```bash
    ssh usuario@10.88.1.2
    ```
-   A placa aparece na central e o configurador abre pelo botão "Abrir configurador". Atualizações:
-   `scp painel.tgz usuario@10.88.1.2:~` e o instalador, sem sair do escritório.
+   O configurador abre em `http://10.88.1.2:8080`, e o endereço aparece também na administração
+   do Engemase Pulse. Atualizações: `scp painel.tgz usuario@10.88.1.2:~` e o instalador, sem
+   sair do escritório.
 
-A VPN volta sozinha a cada boot e não precisa de porta aberta no roteador da loja.
+A VPN volta sozinha a cada boot e não precisa de porta aberta no roteador da unidade.
 
 ## Detalhes
 

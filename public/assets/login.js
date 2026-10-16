@@ -27,7 +27,7 @@
     return dados;
   }
 
-  // quem chegou por um link direto (ex.: a central abrindo /#alarmes) volta
+  // quem chegou por um link direto (ex.: /#nuvem) volta
   // para a tela pedida depois de entrar; só o nome da tela, nada de endereço externo
   function destino() {
     const tela = location.hash.slice(1);

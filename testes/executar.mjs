@@ -404,11 +404,8 @@ console.log('\nSuperfície de ataque do servidor');
     .map((m) => ({ metodo: m[1], rota: m[2], resto: m[3] }));
 
   ok('todas as rotas de API estão mapeadas', rotas.length >= 20, String(rotas.length));
-  // sem sessão, mas restrita ao IP da central pela VPN — a checagem é conferida no bloco da central
-  const POR_ORIGEM = new Set(['/api/central/resumo']);
-  ok('rota liberada por origem tem a checagem de IP', [...POR_ORIGEM].every((r) => new RegExp(
-    `app\\.get\\('${r.replace(/\//g, '\\/')}'[\\s\\S]{0,500}de !== ipCentral[^)]*\\)[\\s\\S]{0,30}return res\\.status\\(403\\)`).test(fonte)));
-  const desprotegidas = rotas.filter((r) => !PUBLICAS.has(r.rota) && !POR_ORIGEM.has(r.rota) && !/exigir\('/.test(r.resto));
+  ok('o resumo da central antiga não existe mais', !rotas.some((r) => r.rota.startsWith('/api/central')));
+  const desprotegidas = rotas.filter((r) => !PUBLICAS.has(r.rota) && !/exigir\('/.test(r.resto));
   ok('nenhuma rota sensível sem exigência de papel', desprotegidas.length === 0,
     desprotegidas.map((r) => r.rota).join(', '));
 
@@ -1998,18 +1995,18 @@ console.log('\nInstalação no Linux');
   ok('instalador não leva node_modules do Windows nem os bancos', /--exclude=\.\/node_modules/.test(txt) && /--exclude=\.\/dados/.test(txt));
   ok('instalador preserva a configuração do servidor', /\.nova/.test(txt) && /--exclude='\.\/config\*\.json'/.test(txt));
 
-  // central de operação: scripts que rodam no Linux, resumo da loja fechado para quem não é a central
-  for (const f of ['central/montar-vm.sh', 'central/vpn-novo.sh', 'central/backup.sh', 'central/web.sh', 'central/acesso.sh']) {
-    ok(`${f} com fim de linha Unix`, !fs.readFileSync(path.join(raiz, f)).includes(13));
+  // VPN de manutenção: só o WireGuard na central; o gateway abre SSH e configurador para o técnico
+  const centralDir = path.join(raiz, 'central');
+  for (const f of ['montar-vm.sh', 'vpn-novo.sh', 'backup.sh', 'enxugar.sh']) {
+    ok(`central/${f} com fim de linha Unix`, !fs.readFileSync(path.join(centralDir, f)).includes(13));
   }
+  ok('central sem tela, alarmes nem acesso pela internet',
+    fs.readdirSync(centralDir).sort().join() === 'backup.sh,enxugar.sh,montar-vm.sh,vpn-novo.sh');
   const srvC = fs.readFileSync(path.join(raiz, 'server.js'), 'utf8');
-  ok('resumo para a central só responde ao IP declarado em central.ip, e não ao que vem pelo proxy dela',
-    /app\.get\('\/api\/central\/resumo'[\s\S]{0,500}if \(!ipCentral \|\| de !== ipCentral \|\| req\.headers\['x-forwarded-for'\]\)/.test(srvC));
-  ok('a central é proxy confiável da loja (bloqueio de senha pelo IP real)',
-    /origemDaRequisicao\(req,\s*\[\.\.\.\(config\.seguranca\?\.proxies_confiaveis \|\| \[\]\), config\.central\?\.ip\]/.test(srvC));
-  ok('instalador liga a loja na VPN e grava central.ip', /--vpn\)/.test(txt) && /c\.central = \{ \.\.\.\(c\.central \|\| \{\}\), ip \}/.test(txt));
-  const centralJs = fs.readFileSync(path.join(raiz, 'central/servidor.js'), 'utf8');
-  ok('central escuta só no endereço da VPN por padrão', /CENTRAL_ESCUTA \|\| '10\.88\.0\.1'/.test(centralJs));
+  ok('bloqueio de senha pelo IP real só atrás dos proxies declarados',
+    /origemDaRequisicao\(req, config\.seguranca\?\.proxies_confiaveis \|\| \[\]\)/.test(srvC) && !/config\.central/.test(srvC));
+  ok('instalador liga o gateway na VPN e libera o SSH e o configurador só pela VPN',
+    /--vpn\)/.test(txt) && /ufw allow in on wg0 to any port 22 proto tcp/.test(txt) && !/c\.central =/.test(txt));
   // alarme da instalação com {nome}: renomear o equipamento muda a mensagem junto
   {
     const plantaN = JSON.parse(fs.readFileSync(path.join(raiz, 'config.planta.json'), 'utf8'));
@@ -2019,95 +2016,61 @@ console.log('\nInstalação no Linux');
     ok('config.planta.json: alarmes "sem consumo" usam {nome}',
       plantaN.alarmes.filter((a) => /sem consumo/.test(a.mensagem)).every((a) => a.mensagem.startsWith('{nome}')));
   }
-  const alarmesHtml = fs.readFileSync(path.join(raiz, 'central/publico/alarmes.html'), 'utf8');
-  ok('central: tela de alarmes servida e copiada para a VM',
-    /'\/alarmes': 'alarmes\.html'/.test(centralJs) && /publico\/"\*\.html/.test(fs.readFileSync(path.join(raiz, 'central/montar-vm.sh'), 'utf8')));
-  ok('alarmes: "Abrir configurador" abre a situação do gateway', /#inicio`/.test(alarmesHtml));
-  ok('alarmes: loja sem contato também vira alarme', /Loja sem comunicação com a central/.test(alarmesHtml));
-  ok('alarmes: lista só redesenha quando muda (clique não se perde)', /assinatura === alvo\.dataset\.assinatura/.test(alarmesHtml));
   const loginJs = fs.readFileSync(path.join(raiz, 'public/assets/login.js'), 'utf8');
   ok('login devolve para a tela pedida, só nome de tela (nada de endereço externo)',
     /\/\^\[a-z\]\[a-z0-9_-\]\{0,30\}\$\/\.test\(tela\) \? `\/#\$\{tela\}` : '\/'/.test(loginJs));
   const montar = fs.readFileSync(path.join(raiz, 'central/montar-vm.sh'), 'utf8');
-  ok('VPN: operador alcança loja, loja não alcança loja', /-s 10\.88\.2\.0\/24 -d 10\.88\.1\.0\/24 -j ACCEPT/.test(montar) && /-i wg0 -o wg0 -j DROP/.test(montar));
+  ok('VPN: técnico alcança o gateway, gateway não alcança outro gateway',
+    /-s 10\.88\.2\.0\/24 -d 10\.88\.1\.0\/24 -j ACCEPT/.test(montar) && /-i wg0 -o wg0 -j DROP/.test(montar));
+  ok('montar-vm: só a porta da VPN entra (nada de 80, 443 ou tela)',
+    /--dport "\$PORTA_VPN" -j ACCEPT/.test(montar) && !/--dport (80|443|8080)\b/.test(montar) && !/servidor\.js|nodejs/.test(montar));
+  const enx = fs.readFileSync(path.join(centralDir, 'enxugar.sh'), 'utf8');
+  ok('enxugar.sh desliga a tela e o login Google e fecha 80/443, sem tocar na VPN',
+    /disable --now/.test(enx) && /--dport 443/.test(enx) && /rm -rf \/etc\/oauth2-proxy/.test(enx) && !/wg-quick@wg0|wg0\.conf/.test(enx));
 
-  // acesso pela internet: login Google na frente, lista de e-mails mantida pela tela Acessos
-  {
-    const { caddyfile, baseDoIp, hostDaLoja } = await import('../central/web.js');
-    const base = baseDoIp('146.235.41.191');
-    ok('nome sem domínio próprio: o IP no sslip.io', base === '146-235-41-191.sslip.io');
-    ok('id de loja com "_" vira nome de máquina válido', hostDaLoja('loja_2', base) === `loja-loja-2.${base}`);
-    const cf = caddyfile({ base }, [{ id: 'e01', ip: '10.88.1.1', porta: 8080 }]);
-    ok('Caddy: central e cada loja atrás do login', /central\.146-235-41-191\.sslip\.io \{/.test(cf) && /loja-e01\.146-235-41-191\.sslip\.io \{/.test(cf)
-      && (cf.match(/forward_auth 127\.0\.0\.1:4180/g) || []).length === 2 && /reverse_proxy 10\.88\.1\.1:8080/.test(cf));
-    ok('Caddy: o navegador não escolhe o próprio e-mail', (cf.match(/request_header -X-Auth-Request-Email/g) || []).length === 2);
-    ok('Caddy: resumo da loja não existe pela internet', /loja-e01[\s\S]*handle \/api\/central\/\* \{\s*respond 404/.test(cf));
-    const blocoCentral = cf.split(/\n(?=loja-)/)[0];
-    ok('Caddy: só apresentação, privacidade e ícone da central sem login',
-      ['/sobre', '/privacidade', '/icone.png'].every((p) => blocoCentral.includes(`handle ${p} {\n\t\treverse_proxy 127.0.0.1:8081`))
-      && !/loja-e01[\s\S]*handle \/privacidade/.test(cf));
-
-    const tmp = fs.mkdtempSync(path.join(raiz, 'dados', 'central-'));
-    fs.mkdirSync(path.join(tmp, 'acesso'));
-    fs.writeFileSync(path.join(tmp, 'acesso', 'emails.txt'), 'chefe@gmail.com\n');
-    fs.writeFileSync(path.join(tmp, 'acesso', 'administradores.txt'), 'chefe@gmail.com\n');
-    fs.writeFileSync(path.join(tmp, 'web.json'), JSON.stringify({ base }));
-    fs.writeFileSync(path.join(tmp, 'lojas.json'), JSON.stringify({ lojas: [{ id: 'e01', nome: 'Viza', ip: '10.88.1.1', porta: 8080 }] }));
-    Object.assign(process.env, {
-      CENTRAL_ACESSO: path.join(tmp, 'acesso'), CENTRAL_WEB: path.join(tmp, 'web.json'), CENTRAL_LOJAS: path.join(tmp, 'lojas.json'),
+  // vpn-novo.sh numa pasta de mentira (wg falso): cadastra, lista e revoga, aceitando o formato antigo
+  if (process.platform !== 'win32') {
+    const { spawnSync: rodar } = await import('node:child_process');
+    const sb = fs.mkdtempSync(path.join(os.tmpdir(), 'vpn-'));
+    const wgDir = path.join(sb, 'wg');
+    fs.mkdirSync(wgDir); fs.mkdirSync(path.join(sb, 'bin')); fs.mkdirSync(path.join(sb, 'casa'));
+    fs.writeFileSync(path.join(sb, 'bin', 'wg'), [
+      '#!/usr/bin/env bash',
+      'case "$1" in',
+      '  genkey) head -c 32 /dev/urandom | base64 ;;',
+      '  pubkey) read -r k; echo "P+$(printf %s "$k" | cksum | cut -d" " -f1)/k=" ;;',
+      '  show) cat "$WG_DIR/hs" 2>/dev/null ;;',
+      '  set) echo "$*" >> "$WG_DIR/log" ;;',
+      'esac', ''].join('\n'), { mode: 0o755 });
+    fs.writeFileSync(path.join(wgDir, 'wg0.conf'), '[Interface]\nAddress = 10.88.0.1/16\nPrivateKey = x\n\n'
+      + '[Peer]\n# loja e01 Unidade Centro\nPublicKey = VELHA+e01/k=\nAllowedIPs = 10.88.1.1/32\n');
+    fs.writeFileSync(path.join(wgDir, 'central.pub'), 'pub-da-central\n');
+    fs.writeFileSync(path.join(wgDir, 'endereco_publico'), '203.0.113.9\n');
+    fs.writeFileSync(path.join(wgDir, 'hs'), `VELHA+e01/k=\t${Math.floor(Date.now() / 1000) - 20}\n`);
+    const vpn = (...args) => rodar('bash', [path.join(centralDir, 'vpn-novo.sh'), ...args], {
+      encoding: 'utf8',
+      env: { ...process.env, WG_DIR: wgDir, COPIA_DIR: path.join(sb, 'casa'), SUDO_USER: os.userInfo().username, PATH: `${path.join(sb, 'bin')}:${process.env.PATH}` },
     });
-    const { atender } = await import('../central/servidor.js');
-    const http = await import('node:http');
-    const subir = (viaWeb) => new Promise((r) => { const s = http.createServer(atender(viaWeb)).listen(0, '127.0.0.1', () => r(s)); });
-    const web = await subir(true);
-    const vpn = await subir(false);
-    const pedir = async (s, caminho, { email, corpo, semCabecalho } = {}) => {
-      const r = await fetch(`http://127.0.0.1:${s.address().port}${caminho}`, {
-        method: corpo ? 'POST' : 'GET',
-        headers: { ...(email ? { 'X-Auth-Request-Email': email } : {}), ...(corpo && !semCabecalho ? { 'X-Central': '1' } : {}), 'Content-Type': 'application/json' },
-        body: corpo ? JSON.stringify(corpo) : undefined,
-      });
-      return { status: r.status, dados: await r.json().catch(() => null) };
-    };
     try {
-      ok('web sem e-mail do login: barrado', (await pedir(web, '/')).status === 403);
-      const pub = await fetch(`http://127.0.0.1:${web.address().port}/privacidade`);
-      const sob = await fetch(`http://127.0.0.1:${web.address().port}/sobre`);
-      ok('política de privacidade e apresentação abertas sem login (exigência do Google)',
-        pub.status === 200 && /Política de Privacidade/.test(await pub.text()) && sob.status === 200 && /privacidade/.test(await sob.text()));
-      ok('web com e-mail fora da lista: barrado', (await pedir(web, '/api/lojas', { email: 'estranho@gmail.com' })).status === 403);
-      const eu = await pedir(web, '/api/eu', { email: 'Chefe@Gmail.com' });
-      ok('administrador reconhecido (maiúsculas não importam)', eu.dados?.admin === true && eu.dados?.web === true);
-      ok('alteração sem o cabeçalho próprio é recusada', (await pedir(web, '/api/acesso', { email: 'chefe@gmail.com', corpo: { email: 'op@gmail.com' }, semCabecalho: true })).status === 400);
-      const lib = await pedir(web, '/api/acesso', { email: 'chefe@gmail.com', corpo: { email: 'Op@Gmail.com', admin: false } });
-      ok('administrador libera um e-mail', lib.status === 200 && lib.dados.usuarios.some((u) => u.email === 'op@gmail.com' && !u.admin));
-      ok('o e-mail vai para o arquivo que o oauth2-proxy lê', fs.readFileSync(path.join(tmp, 'acesso', 'emails.txt'), 'utf8').split('\n').includes('op@gmail.com'));
-      ok('registro de quem liberou', /chefe@gmail\.com\s+liberou\s+op@gmail\.com/.test(fs.readFileSync(path.join(tmp, 'acesso', 'registro.log'), 'utf8')));
-      const lojasWeb = await pedir(web, '/api/lojas', { email: 'op@gmail.com' });
-      ok('operador liberado vê as lojas, e o painel abre pelo endereço da internet', lojasWeb.dados?.lojas[0].painel === `https://loja-e01.${base}/`);
-      ok('operador não vê nem altera a lista', (await pedir(web, '/api/acesso', { email: 'op@gmail.com' })).status === 403
-        && (await pedir(web, '/api/acesso', { email: 'op@gmail.com', corpo: { email: 'x@gmail.com' } })).status === 403);
-      ok('administrador não remove o próprio acesso', (await pedir(web, '/api/acesso/remover', { email: 'chefe@gmail.com', corpo: { email: 'chefe@gmail.com' } })).status === 400);
-      ok('administrador não tira o próprio papel', (await pedir(web, '/api/acesso', { email: 'chefe@gmail.com', corpo: { email: 'chefe@gmail.com', admin: false } })).status === 400);
-      ok('e-mail inválido recusado', (await pedir(web, '/api/acesso', { email: 'chefe@gmail.com', corpo: { email: 'nao é email' } })).status === 400);
-      await pedir(web, '/api/acesso/remover', { email: 'chefe@gmail.com', corpo: { email: 'op@gmail.com' } });
-      ok('removido perde o acesso na hora', (await pedir(web, '/api/lojas', { email: 'op@gmail.com' })).status === 403);
-      const lojasVpn = await pedir(vpn, '/api/lojas');
-      ok('pela VPN continua igual: painel direto pelo IP da VPN', lojasVpn.status === 200 && lojasVpn.dados.lojas[0].painel === 'http://10.88.1.1:8080/');
-      ok('pela VPN o cabeçalho de e-mail não vale nada', (await pedir(vpn, '/api/acesso', { email: 'chefe@gmail.com' })).status === 403);
+      const novo = vpn('unidade', 'e02', 'Unidade Norte');
+      ok('vpn-novo: cadastra o gateway no próximo endereço livre', novo.status === 0 && /cadastrado em 10\.88\.1\.2/.test(novo.stdout), novo.stderr);
+      const arq = fs.readFileSync(path.join(sb, 'casa', 'unidade-e02.conf'), 'utf8');
+      ok('vpn-novo: o gateway só enxerga a central e os técnicos', /AllowedIPs = 10\.88\.0\.1\/32, 10\.88\.2\.0\/24/.test(arq) && /Endpoint = 203\.0\.113\.9:51820/.test(arq));
+      ok('vpn-novo: nome antigo "loja" vale, e não cadastra de novo', vpn('loja', 'e01', 'x').status === 1);
+      ok('vpn-novo: técnico na faixa dos técnicos', /10\.88\.2\.1/.test(vpn('tecnico', 'ana').stdout));
+      const lista = vpn('listar').stdout;
+      ok('vpn-novo listar: endereço e contato de cada um (formato antigo também)',
+        /unidade\s+e01\s+10\.88\.1\.1\s+Unidade Centro\s+conectado/.test(lista) && /unidade\s+e02\s+10\.88\.1\.2\s+Unidade Norte\s+nunca/.test(lista)
+        && /tecnico\s+ana\s+10\.88\.2\.1/.test(lista), lista);
+      const rem = vpn('remover', 'unidade', 'e01');
+      const conf = fs.readFileSync(path.join(wgDir, 'wg0.conf'), 'utf8');
+      ok('vpn-novo remover: tira só aquele bloco e derruba a chave na hora',
+        rem.status === 0 && !/VELHA\+e01/.test(conf) && /# unidade e02 Unidade Norte/.test(conf) && /\[Interface\]/.test(conf)
+        && /peer VELHA\+e01\/k= remove/.test(fs.readFileSync(path.join(wgDir, 'log'), 'utf8')), rem.stderr);
+      ok('vpn-novo remover: quem não existe dá erro', vpn('remover', 'unidade', 'e99').status === 1);
     } finally {
-      web.close(); vpn.close();
-      fs.rmSync(tmp, { recursive: true, force: true });
+      fs.rmSync(sb, { recursive: true, force: true });
     }
-    const priv = fs.readFileSync(path.join(raiz, 'central/publico/privacidade.html'), 'utf8');
-    ok('política de privacidade sem campo a preencher, com o controlador e o canal de contato',
-      !/preencher|\[[A-Za-zÀ-ú ]+\]/.test(priv) && /Engemase Engenharia LTDA/.test(priv) && /engemase@engemase\.com\.br/.test(priv) && /Uso Limitado/.test(priv));
-    const wsh = fs.readFileSync(path.join(raiz, 'central/web.sh'), 'utf8');
-    ok('web.sh: só os e-mails da lista entram (sem email_domains liberando tudo)',
-      /authenticated_emails_file = "\$ACESSO\/emails\.txt"/.test(wsh) && !/email_domains/.test(wsh));
-    ok('web.sh: oauth2-proxy só em 127.0.0.1 e com download conferido', /http_address = "127\.0\.0\.1:4180"/.test(wsh) && /sha256sum/.test(wsh));
-    ok('montar-vm: central abre a porta do login só em 127.0.0.1 e grava a lista', /CENTRAL_PROXY_PORTA=8081/.test(montar) && /ReadWritePaths=-\$DESTINO\/acesso/.test(montar));
-    ok('central: porta web só em 127.0.0.1', /abrir\(PORTA_WEB, '127\.0\.0\.1', true\)/.test(centralJs));
   }
 
   // logos: abrem sem login (a tela de login mostra), o resto da interface não
@@ -2530,6 +2493,20 @@ console.log('\nLigação com a nuvem pela interface');
   ok('linhas de nível vão junto do reservatório (só as válidas, rótulo aparado)',
     JSON.stringify(clpN.marcas) === JSON.stringify([{ valor: 97, rotulo: 'alto', prioridade: 'media' }, { valor: 15, rotulo: 'crítico', prioridade: 'alta' }]));
   ok('medidor de energia não leva linhas de nível', !('marcas' in eqsN.find((e) => e.id === 'geral')));
+  const criadas = [];
+  const comVpn = (interfaces, cfg = {}) => {
+    const x = new Nuvem(() => cfg, bancoN, { interfaces: () => interfaces });
+    criadas.push(x);
+    return x;
+  };
+  const vpnSim = comVpn({ eth0: [{ family: 'IPv4', address: '192.168.0.9' }], wg0: [{ family: 'IPv4', address: '10.88.1.7' }] },
+    { porta_http: 8090, seguranca: { tls: { chave: 'x', certificado: 'y' } } });
+  ok('endereço na VPN vai para o Pulse (técnico abre SSH e configurador por ele)',
+    JSON.stringify(vpnSim.vpn()) === JSON.stringify({ ip: '10.88.1.7', porta: 8090, https: true }));
+  ok('sem VPN (ou fora da faixa 10.88), não manda endereço',
+    comVpn({ eth0: [{ family: 'IPv4', address: '10.88.1.7' }] }).vpn() === null
+    && comVpn({ wg0: [{ family: 'IPv4', address: '172.16.0.2' }] }).vpn() === null);
+  for (const x of criadas) x.parar();
   ligacao.apagar();
   ok('remover a ligação da tela volta para a seção do config.json', n.conf.url === 'https://antigo.com' && !fs.existsSync(arquivo));
   fs.rmSync(pasta, { recursive: true, force: true });

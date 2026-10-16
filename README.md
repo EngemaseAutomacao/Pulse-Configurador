@@ -56,9 +56,9 @@ npm run teste           # bateria de testes
 npm run orcamento       # estimativa de tempo da varredura na RS-485
 ```
 
-**Central de operação (várias lojas numa tela, pela VPN):** **[CENTRAL.md](CENTRAL.md)**.
+**VPN de manutenção (SSH e configurador de qualquer unidade, de qualquer lugar):** **[CENTRAL.md](CENTRAL.md)**.
 
-**Envio para a nuvem (Monitor de Energia, acesso do cliente pela internet):** **[NUVEM.md](NUVEM.md)**.
+**Envio para o Engemase Pulse (acesso do cliente pela internet):** **[NUVEM.md](NUVEM.md)**.
 
 **Servidor Linux, como serviço:** siga o **[LINUX.md](LINUX.md)**. Ele cobre a cópia
 pelo SSH, os nomes fixos das portas seriais, o `sudo bash tools/instalar-linux.sh` (que

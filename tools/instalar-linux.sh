@@ -3,8 +3,8 @@
 #
 #   sudo bash tools/instalar-linux.sh                       # usa config.planta.json
 #   sudo bash tools/instalar-linux.sh config.fx3u.json      # outra configuração
-#   sudo bash tools/instalar-linux.sh config.planta.json --vpn ~/loja-l01.conf
-#                                      # e liga a loja na VPN da central (CENTRAL.md)
+#   sudo bash tools/instalar-linux.sh config.planta.json --vpn ~/unidade-e01.conf
+#                                      # e liga o gateway na VPN de manutenção (CENTRAL.md)
 #
 # Rode de dentro da pasta copiada do projeto. Na atualização, a configuração e o
 # banco que já estão no servidor (dados/) são preservados — ver LINUX.md.
@@ -112,7 +112,7 @@ done
 HTTP="$(node -p "require('./$CONFIG').porta_http || 8080")"
 
 if [ -n "$VPN" ]; then
-  passo "VPN da central de operação"
+  passo "VPN de manutenção"
   if ! command -v wg-quick >/dev/null; then
     # um repositório quebrado de outro programa (ex.: chave vencida do InfluxDB)
     # faz o "update" terminar com erro, mas as listas do Ubuntu atualizam mesmo assim
@@ -122,19 +122,15 @@ if [ -n "$VPN" ]; then
   fi
   mkdir -p /etc/wireguard
   install -m 600 -o root -g root "$VPN" /etc/wireguard/wg0.conf
-  # o primeiro AllowedIPs do arquivo da loja é o endereço da central (10.88.0.1/32)
+  # o primeiro AllowedIPs do arquivo do gateway é o endereço da central (10.88.0.1/32)
   CENTRAL_IP="$(sed -n 's/^AllowedIPs *= *\([0-9.]*\)\/32.*/\1/p' /etc/wireguard/wg0.conf | head -n1)"
   [ -n "$CENTRAL_IP" ] || falha "não achei o endereço da central no arquivo da VPN"
   systemctl enable wg-quick@wg0 >/dev/null
   systemctl restart wg-quick@wg0
-  # só esse endereço lê o resumo da loja (/api/central/resumo)
-  sudo -u "$USUARIO" node -e '
-    const fs = require("fs"); const [arq, ip] = process.argv.slice(1);
-    const c = JSON.parse(fs.readFileSync(arq, "utf8"));
-    c.central = { ...(c.central || {}), ip };
-    fs.writeFileSync(arq, JSON.stringify(c, null, 2) + "\n");' "$CONFIG" "$CENTRAL_IP"
+  # pela VPN chega só o técnico (a central bloqueia o resto): configurador e SSH
   if command -v ufw >/dev/null && ufw status | grep -q '^Status: active'; then
     ufw allow in on wg0 to any port "$HTTP" proto tcp >/dev/null
+    ufw allow in on wg0 to any port 22 proto tcp >/dev/null
   fi
   if ping -c 2 -W 3 "$CENTRAL_IP" >/dev/null 2>&1; then
     echo "central $CENTRAL_IP alcançável pela VPN"

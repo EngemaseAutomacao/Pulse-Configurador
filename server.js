@@ -119,11 +119,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// a central também é proxy: quem abre a loja pelo endereço da internet chega
-// aqui pela VPN com o IP dela, e o IP real vem no X-Forwarded-For que ela põe.
-// Sem isso, 5 senhas erradas de um operador bloqueariam todos os outros
-const origem = (req) => origemDaRequisicao(req,
-  [...(config.seguranca?.proxies_confiaveis || []), config.central?.ip].filter(Boolean));
+// atrás de um proxy (HTTPS na frente, por exemplo), o IP real vem no
+// X-Forwarded-For que ele põe. Sem isso, 5 senhas erradas de um usuário
+// bloqueariam todos os outros que chegam pelo mesmo proxy
+const origem = (req) => origemDaRequisicao(req, config.seguranca?.proxies_confiaveis || []);
 
 /* ------------------------------------------------------------ autenticação */
 
@@ -157,10 +156,6 @@ function exigirCabecalho(req, res, next) {
 app.use(autenticar);
 app.use('/api', exigirCabecalho);
 
-/* Resumo para a central de operação, que enxerga a loja pela VPN. Sem sessão,
-   mas só responde ao endereço da central declarado em `central.ip`: dentro do
-   WireGuard esse endereço só pode vir do túnel da própria central (o túnel
-   recusa pacote de quem não tem a chave dela). Sem `central.ip`, fica fechado. */
 const versaoDoPainel = (() => {
   try { return JSON.parse(fs.readFileSync(path.join(raiz, 'package.json'), 'utf8')).version; } catch { return null; }
 })();
@@ -168,27 +163,6 @@ const versaoDoPainel = (() => {
 // pela tela Nuvem (um arquivo por configuração, em dados/) ou na seção "nuvem"
 const ligacaoNuvem = new LigacaoNuvem(path.join(raiz, 'dados', `nuvem-${path.basename(arquivoEmUso, '.json')}.json`));
 const nuvem = new Nuvem(() => config, banco, { versao: versaoDoPainel, ligacao: ligacaoNuvem });
-
-app.get('/api/central/resumo', (req, res) => {
-  const ipCentral = config.central?.ip;
-  const de = String(req.socket.remoteAddress || '').replace(/^::ffff:/, '');
-  // repassado pelo proxy da central (alguém pela internet) não é a central consultando
-  if (!ipCentral || de !== ipCentral || req.headers['x-forwarded-for']) {
-    return res.status(403).json({ erro: 'reservado à central de operação' });
-  }
-  const eqs = Object.values(ultimo.equipamentos || {});
-  return res.json({
-    planta: config.planta || null,
-    versao: versaoDoPainel,
-    ts: ultimo.ts,
-    simulado: !!ultimo.simulado,
-    equipamentos: eqs.length,
-    online: eqs.filter((e) => e.online).length,
-    sem_comunicacao: eqs.filter((e) => !e.online).map((e) => e.nome),    alarmes: (ultimo.alarmes || []).map((a) => ({
-      mensagem: a.mensagem, prioridade: a.prioridade, inicio: a.inicio, reconhecido: !!a.reconhecido,
-    })),
-  });
-});
 
 app.post('/api/login', (req, res) => {
   const r = acesso.entrar(req.body?.login, req.body?.senha, origem(req));
